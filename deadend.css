@@ -1,0 +1,143 @@
+body {
+	background-color: black;
+	text-align: center;
+	border-color: red;
+	user-drag: none; 
+	user-select: none;
+}
+
+#screen{
+	position:relative;
+	width: 600px;
+	height: 600px;
+	margin: auto;
+	margin-top: 50px;
+	overflow: hidden;
+}
+
+#imgs {
+	display: inline-block;
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	/border: solid blue 2px;
+}
+
+#img, #newimg{
+	display: inline-block;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	/border: solid green 2px;
+}
+
+#img {
+	z-index: 0;
+}
+
+#newimg {
+	z-index: -2;
+}
+
+
+#current .pBox {
+	z-index: 1;
+}
+
+#new .pBox {
+	z-index: -1;
+}
+
+.pBox {
+	display:inline-block;
+	position:absolute;
+	width: 100%;
+	height: 100%;
+	top:0;
+	left: 0;
+	/border:solid green 2px;
+}
+
+
+#tBox {
+	z-index: 10;
+	cursor: cell;
+	width:100px;
+	height:300px;
+	top: 150px;
+	float: left;
+}
+
+#lBox {
+	left:0;
+}
+
+#rBox {
+	right:0;
+}
+
+#rBox, #lBox {
+	width:100px;
+	height:300px;
+	top: 150px;
+}
+
+#fBox {
+	width:300px;
+	height:300px;
+	top: 150px;
+	left:150px;
+}
+
+#bBox {
+	width:600px;
+	height:150px;
+	top: 500px;
+}
+
+
+.box{
+	z-index: 1;
+	position:absolute;
+	//border: solid red 2px;
+}
+
+#pics{
+	height: 0;
+	width: 0;
+	z-index: -20;
+	display: none;
+}
+
+.lCursor, .rCursor {
+	cursor: w-resize;
+}
+
+.fCursor, .bCursor {
+	cursor: n-resize;
+}
+
+.zCursor {
+	cursor: cell;
+}
+
+.mCursor {
+	cursor: pointer;
+}
+
+.dCursor {
+	cursor: default;
+}
+
+#preloads img{
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:1px;
+	height:1px;
+	opacity:.01;
+}
