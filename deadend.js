@@ -93,7 +93,7 @@
 	};
 
 	function importImages(){
-		for (var i = 0; i < 10; i++) {
+		for (var i = 0; i < 27; i++) {
 			var preload = new Image();
 			preload.src = "der/DER100" + correctFrame(i) + ".png";
 			getById("preloads").appendChild(preload);
@@ -111,7 +111,7 @@
 			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
 
 			preloadHTML = getById("preloads").innerHTML;
-			wait = 100;
+			wait = 125;
 	/*		if(!preloadHTML.includes("der/DER100" + frame + ".png")){
 				var preload = new Image();
 				preload.src = "der/DER100" + frame + ".png";
@@ -142,6 +142,7 @@
 		}
 	}
 
+	//for a given frame, this corrects it based on scene variables (such as power being on)
 	function correctFrame(currentFrame){
 		if (power){
 			var powerFrames = [1, 15, 20, 23];
