@@ -64,11 +64,12 @@ body {
 
 
 #tBox {
+	position:absolute;
 	z-index: 10;
-	cursor: cell;
-	width:100px;
-	height:300px;
-	top: 150px;
+	cursor: none;
+	width:600px;
+	height:600px;
+	top: 0px;
 	float: left;
 }
 

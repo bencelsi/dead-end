@@ -7,7 +7,9 @@
 	var newimg;
 	var clear = false;
 	var frame = 0;
-	var json =
+
+	//frame relation data:
+	var json = 
 {frames: [
 		{//0
 			forward: 1
@@ -103,21 +105,21 @@
 			clear = false;
 			var tBox = document.createElement("div"); //top box covers everything to dictate cursor
 			tBox.id = "tBox";
-			//getById("screen").appendChild(tBox);
+			getById("screen").appendChild(tBox);
 		
 			eval(this.getAttribute("name")); //sets the new frame. very insecure- maybe include array of actions? or create virtual box on server with all properties
-			frame = correctFrame(frame);
+			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
 
 			preloadHTML = getById("preloads").innerHTML;
 			wait = 100;
-			if(!preloadHTML.includes("der/DER100" + frame + ".png")){
+	/*		if(!preloadHTML.includes("der/DER100" + frame + ".png")){
 				var preload = new Image();
 				preload.src = "der/DER100" + frame + ".png";
 				getById("preloads").removeChild(getById("preloads").firstChild);
 				getById("preloads").appendChild(preload);
 				wait = 350;
 			}
-		
+		*/
 			newimg = document.createElement("img");
 			newimg.id = "newimg";
 			newimg.src = "der/DER100" + frame + ".png";
@@ -136,6 +138,7 @@
 				getById("new").appendChild(newimg);
 				setTimeout(fadeStep, wait+50);
 			}
+
 		}
 	}
 
@@ -155,19 +158,8 @@
 		var xPos = parseInt(imgs.style.left);
 		//imgs.style.left = xPos + 10 + "px";
 		//alert(parseInt(newimg.style.left));
-		if (Math.abs(xPos) == 600) {
-			imgs.removeChild(getById("current"))
-			getById("new").id = "current";
-			getById("current").style.opacity = 1.0;
-			img = newimg;
-			img.id = "img";
-			imgs.style.left = "0px";
-			img.style.left = "0px";
-			var newDiv = document.createElement("div");
-			newDiv.id = "new";
-			imgs.appendChild(newDiv);
-			//updateBoxes();
-			clear = true;
+		if (Math.abs(xPos) == 600) {					//once
+			endStep();
 		} else if (parseInt(newimg.style.left) > 0) {
 			imgs.style.left = xPos - 10 + "px";
 			//newimg.style.left = xPos - 10 + "px";
@@ -183,16 +175,7 @@
 	function fadeStep(){
 		var opacity = getById("current").style.opacity;
 		if (opacity == 0) {
-			imgs.removeChild(getById("current"));
-			getById("new").id = "current";
-			getById("current").style.opacity = 1.0;
-			img = newimg;
-			img.id = "img";
-			var newDiv = document.createElement("div");
-			newDiv.id = "new";
-			imgs.appendChild(newDiv);
-			//updateBoxes();
-			clear = true;
+			endStep();
 		} else {
 			getById("current").style.opacity = "" + opacity - .05;
 			newimg.style.opacity = 1.0;
@@ -202,12 +185,27 @@
 		}
 	}
 
-	//clears and updates the clickable boxes based on the current frame
+	function endStep(){
+			imgs.removeChild(getById("current"))
+			getById("new").id = "current";
+			getById("current").style.opacity = 1.0;
+			img = newimg;
+			img.id = "img";
+			imgs.style.left = "0px";
+			img.style.left = "0px";
+			var newDiv = document.createElement("div");
+			newDiv.id = "new";
+			imgs.appendChild(newDiv);
+			getById("screen").removeChild(tBox);
+			clear = true;
+	}
+
+	//clears and updates the clickable boxes, based on the current frame
 	function updateBoxes() {
 		getById("setBoxes").innerHTML = "";
 		getById("customBoxes").innerHTML = "";
-		var frameData = json.frames[frame];
-		if (frameData.left != null) {
+		var frameData = json.frames[frame];							//gets the frame data for the current frame
+		if (frameData.left != null) {		
 			makeBox("left", frameData.left);
 		}
 		if (frameData.right != null) {
@@ -219,9 +217,9 @@
 		if (frameData.back != null) {
 			makeBox("back", frameData.back);
 		}
-		if (frameData.boxes != null){
+		if (frameData.boxes != null){			//creates custom boxes
 			for (var i = 0; i < frameData.boxes.length; i++) {
-				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){
+				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){			//the "if" property is used for conditional boxes
 					if (frameData.boxes[i].action != null){
 						makeBox(frameData.boxes[i], frameData.boxes[i].action);
 					} else {
@@ -232,7 +230,8 @@
 		}
 	}
 
-	//makes either a custom or pre-determined box
+	//makes either a custom box, or a "preset" box (such as a left or right box).
+	//info is either the type of preset ("left", "right", etc.) or a JSON object with box data
 	function makeBox(info, action) {
 		var box = document.createElement("div");
 		box.className = "box";
