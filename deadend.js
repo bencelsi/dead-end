@@ -5,7 +5,7 @@
 	var imgs;
 	var screen;
 	var newimg;
-	var clear = false;
+	var clear = false; //whether not to listen to user input
 	var frame = 0;
 
 	//frame relation data:
@@ -103,43 +103,35 @@
 	function boxClick(){
 		if (clear) {
 			clear = false;
-			var tBox = document.createElement("div"); //top box covers everything to dictate cursor
-			tBox.id = "tBox";
-			getById("screen").appendChild(tBox);
+			var topBox = document.createElement("div"); //top box covers everything to dictate cursor
+			topBox.id = "topBox";
+			getById("screen").appendChild(topBox);
 		
 			eval(this.getAttribute("name")); //sets the new frame. very insecure- maybe include array of actions? or create virtual box on server with all properties
 			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
 
-			wait = 125;
-	/*		preloadHTML = getById("preloads").innerHTML;
-			if(!preloadHTML.includes("der/DER100" + frame + ".png")){
-				var preload = new Image();
-				preload.src = "der/DER100" + frame + ".png";
-				getById("preloads").removeChild(getById("preloads").firstChild);
-				getById("preloads").appendChild(preload);
-				wait = 350;
-			}
-		*/
 			newimg = document.createElement("img");
 			newimg.id = "newimg";
 			newimg.src = "der/DER100" + frame + ".jpeg";
-			console.log("a");
-			updateBoxes();
 			
-			if (this.id == "lBox" || this.id == "rBox") {
-				if (this.id === "lBox"){
+			if (this.id == "leftBox" || this.id == "rightBox") {
+				if (this.id === "leftBox"){
 					newimg.style.left = "-600px";
+					img.classList.add("leftOut");
+					newimg.classList.add("leftIn");
 				} else {
 					newimg.style.left = "600px";
+					img.classList.add("rightOut");
+					newimg.classList.add("rightIn");
 				}
 				getById("new").appendChild(newimg);
-				img.style.left = "0px";
-				setTimeout(swipeStep, wait);
+				setTimeout(endStep, 490);
 			} else {
 				getById("new").appendChild(newimg);
-				setTimeout(fadeStep, wait+50);
+				setTimeout(fadeStep, 125);
 			}
-
+			//debugger;
+			updateBoxes();
 		}
 	}
 
@@ -195,9 +187,10 @@
 		var box = document.createElement("div");
 		box.className = "box";
 		box.onclick = boxClick;
+
 		if (typeof info === "string") {									//preset boxes
-			box.id = info.substring(0,1) + "Box";
-			box.classList.add(info.substring(0,1) + "Cursor");
+			box.id = info + "Box";
+			box.classList.add(info + "Cursor");
 			box.setAttribute("name", "frame = " + action + ";");
 			getById("setBoxes").appendChild(box);
 		} else {																	//custom boxes
@@ -267,7 +260,7 @@
 			var newDiv = document.createElement("div");
 			newDiv.id = "new";
 			imgs.appendChild(newDiv);
-			getById("screen").removeChild(tBox);
+			getById("screen").removeChild(topBox);
 			clear = true;
 	}
 })();
