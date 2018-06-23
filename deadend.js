@@ -18,7 +18,7 @@
 		},{//2
 			left: 7, right: 3, forward: 15
 		},{//3
-			left: 1, right: 4, forward: 8
+			left: 1, right: 4, forward: 8.1
 		},{//4
 			left: 3, right: 5
 		},{//5
@@ -95,7 +95,7 @@
 	function importImages(){
 		for (var i = 0; i < 27; i++) {
 			var preload = new Image();
-			preload.src = "der/DER100" + correctFrame(i) + ".png";
+			preload.src = "der/DER100" + correctFrame(i) + ".jpeg";
 			getById("preloads").appendChild(preload);
 		}
 	}
@@ -110,9 +110,9 @@
 			eval(this.getAttribute("name")); //sets the new frame. very insecure- maybe include array of actions? or create virtual box on server with all properties
 			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
 
-			preloadHTML = getById("preloads").innerHTML;
 			wait = 125;
-	/*		if(!preloadHTML.includes("der/DER100" + frame + ".png")){
+	/*		preloadHTML = getById("preloads").innerHTML;
+			if(!preloadHTML.includes("der/DER100" + frame + ".png")){
 				var preload = new Image();
 				preload.src = "der/DER100" + frame + ".png";
 				getById("preloads").removeChild(getById("preloads").firstChild);
@@ -122,7 +122,8 @@
 		*/
 			newimg = document.createElement("img");
 			newimg.id = "newimg";
-			newimg.src = "der/DER100" + frame + ".png";
+			newimg.src = "der/DER100" + frame + ".jpeg";
+			console.log("a");
 			updateBoxes();
 			
 			if (this.id == "lBox" || this.id == "rBox") {
@@ -153,6 +154,75 @@
 			}
 		}
 		return(currentFrame);
+	}
+
+	
+
+	//clears and updates the clickable boxes, based on the current frame
+	function updateBoxes() {
+		getById("setBoxes").innerHTML = "";
+		getById("customBoxes").innerHTML = "";
+		var frameData = json.frames[frame];							//gets the frame data for the current frame
+		if (frameData.left != null) {		
+			makeBox("left", frameData.left);
+		}
+		if (frameData.right != null) {
+			makeBox("right", frameData.right);
+		}
+		if (frameData.forward != null) {
+			makeBox("forward", frameData.forward);
+		}
+		if (frameData.back != null) {
+			makeBox("back", frameData.back);
+		}
+		if (frameData.boxes != null){			//creates custom boxes
+			for (var i = 0; i < frameData.boxes.length; i++) {
+				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){			//the "if" property is used for conditional boxes
+					if (frameData.boxes[i].action != null){
+						makeBox(frameData.boxes[i], frameData.boxes[i].action);
+					} else {
+						makeBox(frameData.boxes[i], null);
+					}
+				}
+			}
+		}
+	}
+
+	//makes either a custom box, or a "preset" box (such as a left or right box).
+	//info is either the type of preset ("left", "right", etc.) or a JSON object with box data
+	//action is the action taken when the box is clicked.
+	function makeBox(info, action) {
+		var box = document.createElement("div");
+		box.className = "box";
+		box.onclick = boxClick;
+		if (typeof info === "string") {									//preset boxes
+			box.id = info.substring(0,1) + "Box";
+			box.classList.add(info.substring(0,1) + "Cursor");
+			box.setAttribute("name", "frame = " + action + ";");
+			getById("setBoxes").appendChild(box);
+		} else {																	//custom boxes
+			box.setAttribute("name", action);
+			if (info.pos != null) {
+				box.style.left = info.pos[0] + "px";
+				box.style.top = info.pos[1] + "px";
+				box.style.width = info.pos[2] + "px";
+				box.style.height = info.pos[3] + "px";
+			}
+			if (info.cursor != null) {
+				box.classList.add(info.cursor + "Cursor");
+			}
+			if (info.img != null) {											//pic boxes
+				var pic = document.createElement("img");
+				pic.classList.add("pBox");
+				pic.src = "der/DER100" + info.img + ".jpeg";
+				getById("new").appendChild(pic);
+			}
+			getById("customBoxes").appendChild(box);
+		}
+	}
+
+	function getById(id) {
+		return document.getElementById(id);
 	}
 
 	function swipeStep(){
@@ -199,71 +269,5 @@
 			imgs.appendChild(newDiv);
 			getById("screen").removeChild(tBox);
 			clear = true;
-	}
-
-	//clears and updates the clickable boxes, based on the current frame
-	function updateBoxes() {
-		getById("setBoxes").innerHTML = "";
-		getById("customBoxes").innerHTML = "";
-		var frameData = json.frames[frame];							//gets the frame data for the current frame
-		if (frameData.left != null) {		
-			makeBox("left", frameData.left);
-		}
-		if (frameData.right != null) {
-			makeBox("right", frameData.right);
-		}
-		if (frameData.forward != null) {
-			makeBox("forward", frameData.forward);
-		}
-		if (frameData.back != null) {
-			makeBox("back", frameData.back);
-		}
-		if (frameData.boxes != null){			//creates custom boxes
-			for (var i = 0; i < frameData.boxes.length; i++) {
-				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){			//the "if" property is used for conditional boxes
-					if (frameData.boxes[i].action != null){
-						makeBox(frameData.boxes[i], frameData.boxes[i].action);
-					} else {
-						makeBox(frameData.boxes[i], null);
-					}
-				}
-			}
-		}
-	}
-
-	//makes either a custom box, or a "preset" box (such as a left or right box).
-	//info is either the type of preset ("left", "right", etc.) or a JSON object with box data
-	function makeBox(info, action) {
-		var box = document.createElement("div");
-		box.className = "box";
-		box.onclick = boxClick;
-		if (typeof info === "string") {									//preset boxes
-			box.id = info.substring(0,1) + "Box";
-			box.classList.add(info.substring(0,1) + "Cursor");
-			box.setAttribute("name", "frame = " + action + ";");
-			getById("setBoxes").appendChild(box);
-		} else {																	//custom boxes
-			box.setAttribute("name", action);
-			if (info.pos != null) {
-				box.style.left = info.pos[0] + "px";
-				box.style.top = info.pos[1] + "px";
-				box.style.width = info.pos[2] + "px";
-				box.style.height = info.pos[3] + "px";
-			}
-			if (info.cursor != null) {
-				box.classList.add(info.cursor + "Cursor");
-			}
-			if (info.img != null) {											//pic boxes
-				var pic = document.createElement("img");
-				pic.classList.add("pBox");
-				pic.src = "der/DER100" + info.img + ".png";
-				getById("new").appendChild(pic);
-			}
-			getById("customBoxes").appendChild(box);
-		}
-	}
-
-	function getById(id) {
-		return document.getElementById(id);
 	}
 })();

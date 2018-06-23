@@ -48,7 +48,7 @@ var frame = 13;
 var frameData = json.Nodes[frame];
 for (var i = 0; i <frameData.clickBoxes.length; i++){
 
-	var b = document.createElement( div");
+	var b = document.createElement( div)
 	b.onclick = partial(goTo, json.Nodes[frame].)
 
 
