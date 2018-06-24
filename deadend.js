@@ -125,10 +125,12 @@
 					newimg.classList.add("rightIn");
 				}
 				getById("new").appendChild(newimg);
-				setTimeout(endStep, 490);
+				setTimeout(endStep, 500);
 			} else {
 				getById("new").appendChild(newimg);
-				setTimeout(fadeStep, 125);
+				img.classList.add("fadeOut");
+				newimg.classList.add("fadeIn");
+				setTimeout(endStep, 500);
 			}
 			//debugger;
 			updateBoxes();
@@ -218,38 +220,14 @@
 		return document.getElementById(id);
 	}
 
-	function swipeStep(){
-		var xPos = parseInt(imgs.style.left);
-		//imgs.style.left = xPos + 10 + "px";
-		//alert(parseInt(newimg.style.left));
-		if (Math.abs(xPos) == 600) {					//once
-			endStep();
-		} else if (parseInt(newimg.style.left) > 0) {
-			imgs.style.left = xPos - 10 + "px";
-			//newimg.style.left = xPos - 10 + "px";
-		} else {
-			imgs.style.left = xPos + 10 + "px";
-			//newimg.style.left = xPos + 10 + "px";
-		}
-		if (!clear) {
-			setTimeout(swipeStep, 5);
-		}
-	}
-
-	function fadeStep(){
-		var opacity = getById("current").style.opacity;
-		if (opacity == 0) {
-			endStep();
-		} else {
-			getById("current").style.opacity = "" + opacity - .05;
-			newimg.style.opacity = 1.0;
-		}
-		if (!clear) {
-			setTimeout(fadeStep, 10);
-		}
-	}
-
 	function endStep(){
+			img.classList.remove("rightOut");
+			newimg.classList.remove("rightIn");
+			img.classList.remove("leftOut");
+			newimg.classList.remove("leftIn");
+			img.classList.remove("fadeOut");
+			newimg.classList.remove("fadeIn");
+
 			imgs.removeChild(getById("current"))
 			getById("new").id = "current";
 			getById("current").style.opacity = 1.0;
