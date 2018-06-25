@@ -1,5 +1,5 @@
 (function(){
-	var BOX_WIDTH = 600;
+	const BOX_WIDTH = 600;
 	var power = false;
 	var img;
 	var imgs;
@@ -9,7 +9,8 @@
 	var frame = 0;
 
 	//frame relation data:
-	var json = 
+	
+	const json = 
 {frames: [
 		{//0
 			forward: 1
@@ -18,7 +19,7 @@
 		},{//2
 			left: 7, right: 3, forward: 15
 		},{//3
-			left: 1, right: 4, forward: 8.1
+			left: 1, right: 4, forward: 8
 		},{//4
 			left: 3, right: 5
 		},{//5
@@ -37,7 +38,7 @@
 			left: 10, right: 8,
 			boxes: [
 				{	pos: [25, 300, 150, 450],
-					cursor: "z",
+					cursor: "zoom",
 					action: "frame = 14;"	
 				}
 			]
@@ -49,10 +50,10 @@
 			boxes: [
 				{	if: "!power", 
 					pos: [250, 300, 100, 100],
-					cursor: "m",
+					cursor: "interact",
 					action: "power = true;"	
 				},
-				{	if: "power", 
+				{	if: "power",
 					img: "x12",
 					action: ""
 				}
@@ -100,41 +101,75 @@
 		}
 	}
 
+	function movie(name){
+		console.log("AAAAAA");
+		var movie = document.createElement("img");
+		movie.id = "movie";
+		movie.src = "extra/" + name + ".gif";
+		getById("movies").appendChild(movie);
+	}
+
 	function boxClick(){
 		if (clear) {
 			clear = false;
 			var topBox = document.createElement("div"); //top box covers everything to dictate cursor
 			topBox.id = "topBox";
 			getById("screen").appendChild(topBox);
-		
+			var lastFrame = frame;
 			eval(this.getAttribute("name")); //sets the new frame. very insecure- maybe include array of actions? or create virtual box on server with all properties
 			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
-
-			newimg = document.createElement("img");
-			newimg.id = "newimg";
-			newimg.src = "der/DER100" + frame + ".jpeg";
+			//debugger;
+			updateBoxes();
+			if (frame != lastFrame){
+				newimg = document.createElement("img");
+				newimg.id = "newimg";
+				newimg.src = "der/DER100" + frame + ".jpeg";
 			
-			if (this.id == "leftBox" || this.id == "rightBox") {
 				if (this.id === "leftBox"){
 					newimg.style.left = "-600px";
 					img.classList.add("leftOut");
 					newimg.classList.add("leftIn");
-				} else {
+				} else if (this.id === "rightBox") {
 					newimg.style.left = "600px";
 					img.classList.add("rightOut");
 					newimg.classList.add("rightIn");
+				} else {
+					img.classList.add("fadeOut");
+					newimg.classList.add("fadeIn");
 				}
 				getById("new").appendChild(newimg);
-				setTimeout(endStep, 500);
+				setTimeout(endStep, 895);
 			} else {
-				getById("new").appendChild(newimg);
-				img.classList.add("fadeOut");
-				newimg.classList.add("fadeIn");
-				setTimeout(endStep, 500);
+				//setTimeout(endStep, 500);
+				clear = true;
 			}
-			//debugger;
-			updateBoxes();
 		}
+	}
+
+	function endStep(){
+			img.classList.remove("rightOut");
+			newimg.classList.remove("rightIn");
+			img.classList.remove("leftOut");
+			newimg.classList.remove("leftIn");
+			img.classList.remove("fadeOut");
+			newimg.classList.remove("fadeIn");
+			imgs.removeChild(getById("current"))
+			getById("new").id = "current";
+			getById("current").style.opacity = 1.0;
+			img = newimg;
+			img.id = "img";
+			imgs.style.left = "0px";
+			img.style.left = "0px";
+			var newDiv = document.createElement("div");
+			newDiv.id = "new";
+			imgs.appendChild(newDiv);
+			getById("screen").removeChild(topBox);
+			clear = true;
+	}
+
+	function movie(){
+		var newDiv = document.createElement("div");
+
 	}
 
 	//for a given frame, this corrects it based on scene variables (such as power being on)
@@ -149,14 +184,13 @@
 		}
 		return(currentFrame);
 	}
-
 	
 
 	//clears and updates the clickable boxes, based on the current frame
 	function updateBoxes() {
 		getById("setBoxes").innerHTML = "";
 		getById("customBoxes").innerHTML = "";
-		var frameData = json.frames[frame];							//gets the frame data for the current frame
+		var frameData = json.frames[frame];		//gets the frame data for the current frame
 		if (frameData.left != null) {		
 			makeBox("left", frameData.left);
 		}
@@ -173,9 +207,9 @@
 			for (var i = 0; i < frameData.boxes.length; i++) {
 				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){			//the "if" property is used for conditional boxes
 					if (frameData.boxes[i].action != null){
-						makeBox(frameData.boxes[i], frameData.boxes[i].action);
+						makeCustomBox(frameData.boxes[i], frameData.boxes[i].action);
 					} else {
-						makeBox(frameData.boxes[i], null);
+						makeCustomBox(frameData.boxes[i], null);
 					}
 				}
 			}
@@ -185,60 +219,41 @@
 	//makes either a custom box, or a "preset" box (such as a left or right box).
 	//info is either the type of preset ("left", "right", etc.) or a JSON object with box data
 	//action is the action taken when the box is clicked.
-	function makeBox(info, action) {
+	function makeBox(type, destination) {
 		var box = document.createElement("div");
 		box.className = "box";
 		box.onclick = boxClick;
+		box.id = type + "Box";
+		box.classList.add(type + "Cursor");
+		box.setAttribute("name", "frame = " + destination + ";");
+		getById("setBoxes").appendChild(box);
+	}
 
-		if (typeof info === "string") {									//preset boxes
-			box.id = info + "Box";
-			box.classList.add(info + "Cursor");
-			box.setAttribute("name", "frame = " + action + ";");
-			getById("setBoxes").appendChild(box);
-		} else {																	//custom boxes
-			box.setAttribute("name", action);
-			if (info.pos != null) {
-				box.style.left = info.pos[0] + "px";
-				box.style.top = info.pos[1] + "px";
-				box.style.width = info.pos[2] + "px";
-				box.style.height = info.pos[3] + "px";
-			}
-			if (info.cursor != null) {
-				box.classList.add(info.cursor + "Cursor");
-			}
-			if (info.img != null) {											//pic boxes
-				var pic = document.createElement("img");
-				pic.classList.add("pBox");
-				pic.src = "der/DER100" + info.img + ".jpeg";
-				getById("new").appendChild(pic);
-			}
-			getById("customBoxes").appendChild(box);
+	function makeCustomBox(info, action) {
+		var box = document.createElement("div");
+		box.className = "box";
+		box.onclick = boxClick;
+														//custom boxes
+		box.setAttribute("name", action);
+		if (info.pos != null) {
+			box.style.left = info.pos[0] + "px";
+			box.style.top = info.pos[1] + "px";
+			box.style.width = info.pos[2] + "px";
+			box.style.height = info.pos[3] + "px";
 		}
+		if (info.cursor != null) {
+			box.classList.add(info.cursor + "Cursor");
+		}
+		if (info.img != null) {											//pic boxes
+			var pic = document.createElement("img");
+			pic.classList.add("pBox");
+			pic.src = "der/DER100" + info.img + ".jpeg";
+			getById("new").appendChild(pic);
+		}
+		getById("customBoxes").appendChild(box);
 	}
 
 	function getById(id) {
 		return document.getElementById(id);
-	}
-
-	function endStep(){
-			img.classList.remove("rightOut");
-			newimg.classList.remove("rightIn");
-			img.classList.remove("leftOut");
-			newimg.classList.remove("leftIn");
-			img.classList.remove("fadeOut");
-			newimg.classList.remove("fadeIn");
-
-			imgs.removeChild(getById("current"))
-			getById("new").id = "current";
-			getById("current").style.opacity = 1.0;
-			img = newimg;
-			img.id = "img";
-			imgs.style.left = "0px";
-			img.style.left = "0px";
-			var newDiv = document.createElement("div");
-			newDiv.id = "new";
-			imgs.appendChild(newDiv);
-			getById("screen").removeChild(topBox);
-			clear = true;
 	}
 })();

@@ -4,9 +4,13 @@ body {
 	border-color: red;
 	user-drag: none; 
 	user-select: none;
+
+	-webkit-animation-fill-mode: forwards;
 }
 
+
 @keyframes leftIn{
+	-webkit-animation-fill-mode: forwards;
    from{
  		opacity: .5;
  	   transform: translateX(0);
@@ -17,6 +21,7 @@ body {
 }
 
 @keyframes leftOut{
+	-webkit-animation-fill-mode: forwards;
    from{
    	opacity: 1;
       transform: translateX(0);
@@ -196,8 +201,12 @@ body {
 	display: none;
 }
 
-.leftCursor, .rightCursor {
-	cursor: w-resize;
+.leftCursor {
+	cursor: url(extra/left.png), auto;
+}
+
+.rightCursor {
+	cursor: url(extra/right.png), auto;
 }
 
 .forwardCursor, .backCursor {
@@ -208,11 +217,11 @@ body {
 	cursor: cell;
 }
 
-.mCursor {
+.interactCursor {
 	cursor: pointer;
 }
 
-.dCursor {
+.defaultCursor {
 	cursor: default;
 }
 
