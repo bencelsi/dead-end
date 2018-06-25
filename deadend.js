@@ -94,6 +94,7 @@
 	};
 
 	function importImages(){
+		console.log("AAAAAA");
 		for (var i = 0; i < 27; i++) {
 			var preload = new Image();
 			preload.src = "der/DER100" + correctFrame(i) + ".jpeg";
@@ -101,16 +102,24 @@
 		}
 	}
 
-	function movie(name){
-		console.log("AAAAAA");
-		var movie = document.createElement("img");
-		movie.id = "movie";
-		movie.src = "extra/" + name + ".gif";
-		getById("movies").appendChild(movie);
+	function playGif(name, frames, delay){
+		var gif = getById("fullGif");
+		gif.src = "movies/" + name + ".gif" + "?a="+Math.random();
+
+
+		gif.style.visibility = "visible"
+		getById("movies").appendChild(gif);
+		setTimeout(function(){
+			console.log("DONE");
+			gif.style.visibility = "hidden";
+		}, frames*delay);
 	}
 
 	function boxClick(){
 		if (clear) {
+			if (frame == 3){
+				playGif("sidepath1", 5, 400);
+			}
 			clear = false;
 			var topBox = document.createElement("div"); //top box covers everything to dictate cursor
 			topBox.id = "topBox";
@@ -138,7 +147,7 @@
 					newimg.classList.add("fadeIn");
 				}
 				getById("new").appendChild(newimg);
-				setTimeout(endStep, 895);
+				setTimeout(endStep, 490);
 			} else {
 				//setTimeout(endStep, 500);
 				clear = true;
