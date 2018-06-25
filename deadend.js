@@ -1,5 +1,7 @@
 (function(){
-	const BOX_WIDTH = 600;
+	const WIDTH = 600;
+	const HEIGHT = 600;
+	var location = 1;
 	var power = false;
 	var img;
 	var imgs;
@@ -19,7 +21,13 @@
 		},{//2
 			left: 7, right: 3, forward: 15
 		},{//3
-			left: 1, right: 4, forward: 8
+			left: 1, right: 4,
+			boxes: [
+				{	pos: [25, 300, 150, 450],
+					cursor: "forward",
+					action: "frame = 8; playGif(\"sidepath1\", 9, 350);"	
+				}
+			]
 		},{//4
 			left: 3, right: 5
 		},{//5
@@ -55,7 +63,7 @@
 				},
 				{	if: "power",
 					img: "x12",
-					action: ""
+					action: "frame=999;"
 				}
 			]
 		},{//15
@@ -82,6 +90,8 @@
 	]
 }
 
+
+
 	window.onload = function(){
 		img = getById("img");
 		imgs = getById("imgs");
@@ -91,6 +101,10 @@
 		importImages();
 		updateBoxes();
 		clear = true;
+		var audio = new Audio('audio/outsiderain.mp3');
+		audio.play();
+		audio.loop = true;
+		audio.volume = .5;
 	};
 
 	function importImages(){
@@ -105,8 +119,6 @@
 	function playGif(name, frames, delay){
 		var gif = getById("fullGif");
 		gif.src = "movies/" + name + ".gif" + "?a="+Math.random();
-
-
 		gif.style.visibility = "visible"
 		getById("movies").appendChild(gif);
 		setTimeout(function(){
@@ -118,7 +130,7 @@
 	function boxClick(){
 		if (clear) {
 			if (frame == 3){
-				playGif("sidepath1", 5, 400);
+				
 			}
 			clear = false;
 			var topBox = document.createElement("div"); //top box covers everything to dictate cursor
@@ -135,11 +147,11 @@
 				newimg.src = "der/DER100" + frame + ".jpeg";
 			
 				if (this.id === "leftBox"){
-					newimg.style.left = "-600px";
+					newimg.style.left = "-"+WIDTH+"px";
 					img.classList.add("leftOut");
 					newimg.classList.add("leftIn");
 				} else if (this.id === "rightBox") {
-					newimg.style.left = "600px";
+					newimg.style.left = WIDTH+"px";
 					img.classList.add("rightOut");
 					newimg.classList.add("rightIn");
 				} else {
@@ -147,7 +159,7 @@
 					newimg.classList.add("fadeIn");
 				}
 				getById("new").appendChild(newimg);
-				setTimeout(endStep, 490);
+				setTimeout(endStep, 475);
 			} else {
 				//setTimeout(endStep, 500);
 				clear = true;
