@@ -1,6 +1,6 @@
 (function(){
-	const WIDTH = 600;
 	const HEIGHT = 600;
+	const WIDTH = 600;
 	var location = 1; //current location (outside/inside)
 	var power = false;
 	var img;
@@ -12,7 +12,7 @@
 
 	//frame relation data:	
 	const json = 
-{frames: [
+{ 	frames: [
 		{//0
 			forward: 1
 		},{//1
@@ -22,7 +22,7 @@
 		},{//3
 			left: 1, right: 4,
 			boxes: [
-				{	pos: [.1*HEIGHT, .25*HEIGHT, .5*WIDTH, .65*HEIGHT],
+				{	pos: [.1*WIDTH, .25*HEIGHT, .5*WIDTH, .65*HEIGHT],
 					cursor: "forward",
 					action: "frame = 8; playGif(\"sidepath1\", 9, 350, \"sidepath\", 0);"
 				}
@@ -44,9 +44,9 @@
 		},{//11
 			left: 10, right: 8,
 			boxes: [
-				{	pos: [.04*HEIGHT, .5*WIDTH, .25*HEIGHT, .75*WIDTH],
+				{	pos: [.04*WIDTH, .5*HEIGHT, .25*WIDTH, .75*HEIGHT],
 					cursor: "zoom",
-					action: "frame = 14;"	
+					action: function(){frame = 14;}	
 				}
 			]
 		},{//12
@@ -56,7 +56,7 @@
 			left: 10, right: 8, back: 11,
 			boxes: [
 				{	if: "!power", 
-					pos: [.4*HEIGHT, .5*WIDTH, .15*HEIGHT, .15*WIDTH],
+					pos: [.4*WIDTH, .5*HEIGHT, .15*WIDTH, .15*HEIGHT],
 					cursor: "interact",
 					action: "power = true;"	
 				},
@@ -86,9 +86,28 @@
 		},{//24
 			left: 22, right: 15
 		}
-	]
+	],
+	presetBoxes: {
+		left:	{
+			pos: [0*WIDTH, .2*HEIGHT, .2*WIDTH, .6*HEIGHT],
+			cursor: "left",
+			action: function(frame){transition(frame, "left")}},
+		right: {
+			pos: [.8*WIDTH, .2*HEIGHT, .2*WIDTH, .6*HEIGHT],
+			cursor: "right",
+			action: function(frame){transition(frame, "right")}},
+		forward: {
+			pos: [.25*WIDTH, .25*HEIGHT, .5*WIDTH, .5*HEIGHT],
+			cursor: "forward",
+			action: function(frame){transition(frame, "fade")}},
+		back: {
+			pos: [0*WIDTH, .8*HEIGHT, 1*WIDTH, .2*HEIGHT],
+			cursor: "back",
+			action: function(frame){transition(frame, "fade");}
+		}
+	}
 }
-
+	
 //******************************************
 //*****************MODEL********************
 //******************************************
@@ -100,10 +119,10 @@
 		imgs.style.left = "0px";
 		getById("current").style.opacity = 1.0;
 		importImages();
-		updateBoxes();
+		updateBoxes(frame);
 		clear = true;
 		var rain = new Audio('audio/outsiderain.mp3');
-		rain.play();
+		//rain.play();
 		rain.loop = true;
 		rain.volume = .5;
 	};
@@ -138,7 +157,115 @@
 		}, audioDelay);
 	}
 
-	function endStep(){
+	
+
+	//for a given frame, this corrects it based on scene variables (such as power being on)
+	function correctFrame(currentFrame){
+		if (power){
+			var powerFrames = [1, 15, 20, 23];
+			for (var i = 0; i < powerFrames.length; i++){
+				if (currentFrame == powerFrames[i]){
+					return(currentFrame + 1);
+				}
+			}
+		}
+		return(currentFrame);
+	}
+	
+
+	//clears and updates the clickable boxes, based on the current frame
+	function updateBoxes(frame) {
+		getById("setBoxes").innerHTML = "";
+		getById("customBoxes").innerHTML = "";
+		var frameData = json.frames[frame];
+		console.log(frame);		//gets the frame data for the current frame
+		if (frameData.left != null) {
+			console.log("Left");
+			makeBox(json.presetBoxes.left, frameData.left);
+		}
+		if (frameData.right != null) {
+			makeBox(json.presetBoxes.right, frameData.right);
+		}
+		if (frameData.forward != null) {
+			makeBox(json.presetBoxes.forward, frameData.forward);
+		}
+		if (frameData.back != null) {
+			makeBox(json.presetBoxes.back, frameData.back);
+		}
+		if (frameData.boxes != null){			//creates custom boxes
+			for (var i = 0; i < frameData.boxes.length; i++) {
+				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){	//the "if" property is used for conditional boxes
+					if (frameData.boxes[i].action != null){
+						makeBox(frameData.boxes[i], new Function(frameData.boxes[i].action));
+					} else {
+						makeBox(frameData.boxes[i], null);
+					}
+				}
+			}
+		}
+	}
+
+	
+	function makeBox(info, param) {
+		
+		var box = document.createElement("div");
+		box.className = "box";
+		//box.setAttribute("name", action);
+
+		if (info.pos != null) {
+			box.style.left = info.pos[0] + "px";
+			box.style.top = info.pos[1] + "px";
+			box.style.width = info.pos[2] + "px";
+			box.style.height = info.pos[3] + "px";
+		}
+		if (info.cursor != null) {
+			box.classList.add(info.cursor + "Cursor");
+		}
+		if (info.img != null) {											//pic boxes
+			var pic = document.createElement("img");
+			pic.classList.add("pBox");
+			pic.src = "der/DER100" + info.img + ".jpeg";
+			getById("new").appendChild(pic);
+		}
+
+		box.onclick = 
+			function(){
+				boxClick(function(){
+					info.action(param)
+				});
+			};
+				
+		getById("customBoxes").appendChild(box);
+	}
+
+
+//******************************************
+//*****************CONTROLLER***************
+//******************************************
+	
+	
+	function transition(frame, type){	
+		frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
+		console.log(frame);
+		updateBoxes(frame);
+		var topBox = document.createElement("div"); //top box covers everything to dictate cursor
+		topBox.id = "topBox";
+		getById("screen").appendChild(topBox);
+			
+		newimg = document.createElement("img");
+		newimg.id = "newimg";
+		newimg.src = "der/DER100" + frame + ".jpeg";
+		
+		if (type === "left"){
+			newimg.style.left = "-"+WIDTH+"px";
+		} else if (type === "right") {
+			newimg.style.left = WIDTH+"px";
+		}
+		img.classList.add(type+"Out");
+		newimg.classList.add(type+"In");
+		
+		getById("new").appendChild(newimg);
+		setTimeout(function (){
 			img.classList.remove("rightOut");
 			newimg.classList.remove("rightIn");
 			img.classList.remove("leftOut");
@@ -156,131 +283,21 @@
 			newDiv.id = "new";
 			imgs.appendChild(newDiv);
 			getById("screen").removeChild(topBox);
-			clear = true;
-	}
-
-	//for a given frame, this corrects it based on scene variables (such as power being on)
-	function correctFrame(currentFrame){
-		if (power){
-			var powerFrames = [1, 15, 20, 23];
-			for (var i = 0; i < powerFrames.length; i++){
-				if (currentFrame == powerFrames[i]){
-					return(currentFrame + 1);
-				}
-			}
-		}
-		return(currentFrame);
-	}
-	
-
-	//clears and updates the clickable boxes, based on the current frame
-	function updateBoxes() {
-		getById("setBoxes").innerHTML = "";
-		getById("customBoxes").innerHTML = "";
-		var frameData = json.frames[frame];		//gets the frame data for the current frame
-		if (frameData.left != null) {		
-			makeBox("left", frameData.left);
-		}
-		if (frameData.right != null) {
-			makeBox("right", frameData.right);
-		}
-		if (frameData.forward != null) {
-			makeBox("forward", frameData.forward);
-		}
-		if (frameData.back != null) {
-			makeBox("back", frameData.back);
-		}
-		if (frameData.boxes != null){			//creates custom boxes
-			for (var i = 0; i < frameData.boxes.length; i++) {
-				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){			//the "if" property is used for conditional boxes
-					if (frameData.boxes[i].action != null){
-						makeCustomBox(frameData.boxes[i], frameData.boxes[i].action);
-					} else {
-						makeCustomBox(frameData.boxes[i], null);
-					}
-				}
-			}
-		}
-	}
-
-	//makes either a custom box, or a "preset" box (such as a left or right box).
-	//info is either the type of preset ("left", "right", etc.) or a JSON object with box data
-	//action is the action taken when the box is clicked.
-	function makeBox(type, destination) {
-		var box = document.createElement("div");
-		box.className = "box";
-		box.onclick = boxClick;
-		box.id = type + "Box";
-		box.classList.add(type + "Cursor");
-		box.setAttribute("name", "frame = " + destination + ";");
-		getById("setBoxes").appendChild(box);
-	}
-
-	function makeCustomBox(info, action) {
-		var box = document.createElement("div");
-		box.className = "box";
-		box.onclick = boxClick;
-														//custom boxes
-		box.setAttribute("name", action);
-		if (info.pos != null) {
-			box.style.left = info.pos[0] + "px";
-			box.style.top = info.pos[1] + "px";
-			box.style.width = info.pos[2] + "px";
-			box.style.height = info.pos[3] + "px";
-		}
-		if (info.cursor != null) {
-			box.classList.add(info.cursor + "Cursor");
-		}
-		if (info.img != null) {											//pic boxes
-			var pic = document.createElement("img");
-			pic.classList.add("pBox");
-			pic.src = "der/DER100" + info.img + ".jpeg";
-			getById("new").appendChild(pic);
-		}
-		getById("customBoxes").appendChild(box);
+	}, 475);
 	}
 
 
-//******************************************
-//*****************CONTROLLER***************
-//******************************************
-
-	function boxClick(){
+	function boxClick(action){
+		console.log("boxClick");
 		if (clear) {
 			clear = false;
-			var topBox = document.createElement("div"); //top box covers everything to dictate cursor
-			topBox.id = "topBox";
-			getById("screen").appendChild(topBox);
-			var lastFrame = frame;
-			eval(this.getAttribute("name")); //sets the new frame. very insecure- maybe include array of actions? or create virtual box on server with all properties
-			frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
-			//debugger;
-			updateBoxes();
-			if (frame != lastFrame){
-				newimg = document.createElement("img");
-				newimg.id = "newimg";
-				newimg.src = "der/DER100" + frame + ".jpeg";
+			(action)();
 			
-				if (this.id === "leftBox"){
-					newimg.style.left = "-"+WIDTH+"px";
-					img.classList.add("leftOut");
-					newimg.classList.add("leftIn");
-				} else if (this.id === "rightBox") {
-					newimg.style.left = WIDTH+"px";
-					img.classList.add("rightOut");
-					newimg.classList.add("rightIn");
-				} else {
-					img.classList.add("fadeOut");
-					newimg.classList.add("fadeIn");
-				}
-				getById("new").appendChild(newimg);
-				setTimeout(endStep, 475);
-			} else {
-				clear = true;
-			}
+			//tr(1,"forward");
+			//action(); //sets the new frame.
+			clear = true;
 		}
 	}
-
 
 //******************************************
 //*****************OTHER********************
