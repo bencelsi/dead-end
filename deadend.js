@@ -1,14 +1,17 @@
+
 (function(){
+	"use strict";
 	const HEIGHT = 600;
 	const WIDTH = 600;
 	var location = 1; //current location (outside/inside)
-	var power = false;
+	var power = true;
 	var img;
 	var imgs;
 	var screen;
 	var newimg;
 	var clear = false; //whether not to listen to user input
 	var frame = 0;
+
 
 	//frame relation data:	
 	const json = 
@@ -17,14 +20,18 @@
 			forward: 1
 		},{//1
 			left: 7, right: 3, forward: 15
-		},{//2s
-			left: 7, right: 3, forward: 15
+		},{//2
+			left: 7, right: 3, forward: 16
 		},{//3
-			left: 1, right: 4,
+			left: ()=>power?2:1, right: 4,
 			boxes: [
 				{	pos: [.1*WIDTH, .25*HEIGHT, .5*WIDTH, .65*HEIGHT],
 					cursor: "forward",
-					action: "frame = 8; playGif(\"sidepath1\", 9, 350, \"sidepath\", 0);"
+					action: ()=>{
+						transition(8, "fade");
+						playGif("sidepath1", 9, 350);
+						playSound("sidepath", 0, false);
+					}
 				}
 			]
 		},{//4
@@ -34,7 +41,7 @@
 		},{//6
 			left: 5, right: 7,
 		},{//7
-			left: 6, right: 1,
+			left: 6, right: ()=>power?2:1,
 		},{//8
 			left: 11, right: 9,
 		},{//9
@@ -46,7 +53,7 @@
 			boxes: [
 				{	pos: [.04*WIDTH, .5*HEIGHT, .25*WIDTH, .75*HEIGHT],
 					cursor: "zoom",
-					action: function(){frame = 14;}	
+					action: ()=>transition(14, "fade")	
 				}
 			]
 		},{//12
@@ -58,17 +65,17 @@
 				{	if: "!power", 
 					pos: [.4*WIDTH, .5*HEIGHT, .15*WIDTH, .15*HEIGHT],
 					cursor: "interact",
-					action: "power = true;"	
+					action: ()=>{power = true;}	
 				},
 				{	if: "power",
 					img: "x12",
-					action: "frame=999;"
+
 				}
 			]
 		},{//15
 			left: 23, right: 20
 		},{//16
-			left: 23, right: 20
+			left: 24, right: 21
 		},{//17
 			left: 16, right: 18, forward: 13
 		},{//18
@@ -78,13 +85,13 @@
 		},{//20
 			left: 15, right: 22
 		},{//21
-			left: 15, right: 22
+			left: 16, right: 22
 		},{//22
-			left: 20, right: 23, forward: 5
+			left: ()=>power?21:20, right: ()=>power?24:23, forward: 5
 		},{//23
 			left: 22, right: 15
 		},{//24
-			left: 22, right: 15
+			left: 22, right: 16
 		}
 	],
 	presetBoxes: {
@@ -111,6 +118,14 @@
 //******************************************
 //*****************MODEL********************
 //******************************************
+	
+
+	function initializeSounds(){
+		//var rain = playSound("outsiderain", .5, true);
+		//var generator = playSound("reddit", .5, true);	
+	}
+
+
 
 	window.onload = function(){
 		img = getById("img");
@@ -120,29 +135,28 @@
 		getById("current").style.opacity = 1.0;
 		importImages();
 		updateBoxes(frame);
+
+		initializeSounds();
 		clear = true;
-		var rain = new Audio('audio/outsiderain.mp3');
-		//rain.play();
-		rain.loop = true;
-		rain.volume = .5;
 	};
 
 	function importImages(){
 		for (var i = 0; i < 27; i++) {
 			var preload = new Image();
-			preload.src = "der/DER100" + correctFrame(i) + ".jpeg";
+			preload.src = "der/DER100" + i + ".jpeg";
 			getById("preloads").appendChild(preload);
 		}
 	}
 
 
 //******************************************
-//*****************VIEW********************
+//*****************VIEW*********************
 //******************************************
 
+	
 
 
-	function playGif(name, frames, delay, audio, audioDelay){
+	function playGif(name, frames, delay){
 		var gif = getById("fullGif");
 		gif.src = "movies/" + name + ".gif" + "?a="+Math.random();
 		gif.style.visibility = "visible"
@@ -150,26 +164,16 @@
 		setTimeout(function(){
 			gif.style.visibility = "hidden";
 		}, frames*delay);
-		setTimeout(function(){
-			var sound = new Audio("audio/"+audio+".mp3");
-			sound.volume = .5;
-			sound.play();
-		}, audioDelay);
+		
 	}
 
-	
-
-	//for a given frame, this corrects it based on scene variables (such as power being on)
-	function correctFrame(currentFrame){
-		if (power){
-			var powerFrames = [1, 15, 20, 23];
-			for (var i = 0; i < powerFrames.length; i++){
-				if (currentFrame == powerFrames[i]){
-					return(currentFrame + 1);
-				}
-			}
-		}
-		return(currentFrame);
+	function playSound(name, volume, loop){
+		var sound = new Audio("audio/"+name+".mp3");
+		setTimeout(function(){
+			sound.volume = .5;
+			sound.play();
+		}, 0);
+		return sound;
 	}
 	
 
@@ -178,25 +182,23 @@
 		getById("setBoxes").innerHTML = "";
 		getById("customBoxes").innerHTML = "";
 		var frameData = json.frames[frame];
-		console.log(frame);		//gets the frame data for the current frame
 		if (frameData.left != null) {
-			console.log("Left");
-			makeBox(json.presetBoxes.left, frameData.left);
+			makeBox(json.presetBoxes.left, simpleEval(frameData.left));
 		}
 		if (frameData.right != null) {
-			makeBox(json.presetBoxes.right, frameData.right);
+			makeBox(json.presetBoxes.right, simpleEval(frameData.right));
 		}
 		if (frameData.forward != null) {
-			makeBox(json.presetBoxes.forward, frameData.forward);
+			makeBox(json.presetBoxes.forward, simpleEval(frameData.forward));
 		}
 		if (frameData.back != null) {
-			makeBox(json.presetBoxes.back, frameData.back);
+			makeBox(json.presetBoxes.back, simpleEval(frameData.back));
 		}
 		if (frameData.boxes != null){			//creates custom boxes
 			for (var i = 0; i < frameData.boxes.length; i++) {
 				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){	//the "if" property is used for conditional boxes
 					if (frameData.boxes[i].action != null){
-						makeBox(frameData.boxes[i], new Function(frameData.boxes[i].action));
+						makeBox(frameData.boxes[i], frameData.boxes[i].action);
 					} else {
 						makeBox(frameData.boxes[i], null);
 					}
@@ -205,7 +207,7 @@
 		}
 	}
 
-	
+	//takes box info, and a parameter for potential function action info
 	function makeBox(info, param) {
 		
 		var box = document.createElement("div");
@@ -245,12 +247,12 @@
 	
 	
 	function transition(frame, type){	
-		frame = correctFrame(frame);	//changes frame based on if power is on, or something like that
-		console.log(frame);
 		updateBoxes(frame);
 		var topBox = document.createElement("div"); //top box covers everything to dictate cursor
 		topBox.id = "topBox";
 		getById("screen").appendChild(topBox);
+			console.log(frame);
+			console.log(power);
 			
 		newimg = document.createElement("img");
 		newimg.id = "newimg";
@@ -266,13 +268,9 @@
 		
 		getById("new").appendChild(newimg);
 		setTimeout(function (){
-			img.classList.remove("rightOut");
-			newimg.classList.remove("rightIn");
-			img.classList.remove("leftOut");
-			newimg.classList.remove("leftIn");
-			img.classList.remove("fadeOut");
-			newimg.classList.remove("fadeIn");
-			imgs.removeChild(getById("current"))
+			img.classList.remove(type+"Out");
+			newimg.classList.remove(type+"In");
+			imgs.removeChild(getById("current"));
 			getById("new").id = "current";
 			getById("current").style.opacity = 1.0;
 			img = newimg;
@@ -283,18 +281,14 @@
 			newDiv.id = "new";
 			imgs.appendChild(newDiv);
 			getById("screen").removeChild(topBox);
-	}, 475);
+		}, 475);
 	}
 
 
 	function boxClick(action){
-		console.log("boxClick");
 		if (clear) {
 			clear = false;
-			(action)();
-			
-			//tr(1,"forward");
-			//action(); //sets the new frame.
+			action();
 			clear = true;
 		}
 	}
@@ -308,5 +302,12 @@
 		return document.getElementById(id);
 	}
 
+	function simpleEval(x) {
+		if (x instanceof Function){
+			return (x)();
+		} else {
+			return x;
+		}
+	}
 
 })();
