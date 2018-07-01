@@ -3,14 +3,8 @@
 	"use strict";
 	const HEIGHT = 600;
 	const WIDTH = 600;
-	var location = 1; //current location (outside/inside)
-	var power = true;
-	var img;
-	var imgs;
-	var screen;
-	var newimg;
-	var clear = false; //whether not to listen to user input
-	var frame = 0;
+	var power = false;
+	var clear = 0; //whether not to listen to user input
 
 
 	//frame relation data:	
@@ -65,7 +59,7 @@
 				{	if: "!power", 
 					pos: [.4*WIDTH, .5*HEIGHT, .15*WIDTH, .15*HEIGHT],
 					cursor: "interact",
-					action: ()=>{power = true;}	
+					action: ()=>{setVolume("outsiderain", 0, 0);}	
 				},
 				{	if: "power",
 					img: "x12",
@@ -94,7 +88,7 @@
 			left: 22, right: 16
 		}
 	],
-	presetBoxes: {
+	boxes: {
 		left:	{
 			pos: [0*WIDTH, .2*HEIGHT, .2*WIDTH, .6*HEIGHT],
 			cursor: "left",
@@ -112,6 +106,9 @@
 			cursor: "back",
 			action: function(frame){transition(frame, "fade");}
 		}
+	},
+	sounds: {
+		
 	}
 }
 	
@@ -121,23 +118,26 @@
 	
 
 	function initializeSounds(){
-		//var rain = playSound("outsiderain", .5, true);
-		//var generator = playSound("reddit", .5, true);	
+		var rain = playSound("outsiderain", 0, true);
+		//var generator = playSound("reddit", .5, true);
+		json.sounds.rain = rain;
+		//json.sounds.rain.volume = 0;
+		//rain.volume = 0;
+		for (var i = 0; i < 999; i++) {
+			json.sounds.rain.volume += .001;			
+		}
 	}
 
-
+	function setVolume(n, volume, speed){
+		json.sounds.n.volume = volume;
+	}
 
 	window.onload = function(){
-		img = getById("img");
-		imgs = getById("imgs");
-		screen = getById("screen");
-		imgs.style.left = "0px";
-		getById("current").style.opacity = 1.0;
 		importImages();
-		updateBoxes(frame);
+		updateBoxes(0);
 
 		initializeSounds();
-		clear = true;
+		
 	};
 
 	function importImages(){
@@ -157,22 +157,22 @@
 
 
 	function playGif(name, frames, delay){
+		clear++;
 		var gif = getById("fullGif");
 		gif.src = "movies/" + name + ".gif" + "?a="+Math.random();
 		gif.style.visibility = "visible"
 		getById("movies").appendChild(gif);
 		setTimeout(function(){
 			gif.style.visibility = "hidden";
-		}, frames*delay);
-		
+			clear--;
+		}, frames*delay);	
 	}
 
 	function playSound(name, volume, loop){
 		var sound = new Audio("audio/"+name+".mp3");
-		setTimeout(function(){
-			sound.volume = .5;
-			sound.play();
-		}, 0);
+		
+		sound.volume = volume;
+		sound.play();
 		return sound;
 	}
 	
@@ -183,16 +183,16 @@
 		getById("customBoxes").innerHTML = "";
 		var frameData = json.frames[frame];
 		if (frameData.left != null) {
-			makeBox(json.presetBoxes.left, simpleEval(frameData.left));
+			makeBox(json.boxes.left, simpleEval(frameData.left));
 		}
 		if (frameData.right != null) {
-			makeBox(json.presetBoxes.right, simpleEval(frameData.right));
+			makeBox(json.boxes.right, simpleEval(frameData.right));
 		}
 		if (frameData.forward != null) {
-			makeBox(json.presetBoxes.forward, simpleEval(frameData.forward));
+			makeBox(json.boxes.forward, simpleEval(frameData.forward));
 		}
 		if (frameData.back != null) {
-			makeBox(json.presetBoxes.back, simpleEval(frameData.back));
+			makeBox(json.boxes.back, simpleEval(frameData.back));
 		}
 		if (frameData.boxes != null){			//creates custom boxes
 			for (var i = 0; i < frameData.boxes.length; i++) {
@@ -246,50 +246,43 @@
 //******************************************
 	
 	
-	function transition(frame, type){	
+	function transition(frame, type){
+		clear++;
 		updateBoxes(frame);
-		var topBox = document.createElement("div"); //top box covers everything to dictate cursor
-		topBox.id = "topBox";
-		getById("screen").appendChild(topBox);
-			console.log(frame);
-			console.log(power);
-			
-		newimg = document.createElement("img");
-		newimg.id = "newimg";
-		newimg.src = "der/DER100" + frame + ".jpeg";
-		
-		if (type === "left"){
-			newimg.style.left = "-"+WIDTH+"px";
-		} else if (type === "right") {
-			newimg.style.left = WIDTH+"px";
+		var img = getById("img");
+		var transitions = getById("transitions");
+		if (type === "none"){
+			img.src = "der/DER100" + frame + ".jpeg"
+		} else {
+			var oldimg = document.createElement("img");
+			oldimg.classList.add("frame");
+			oldimg.src = img.src;
+			oldimg.classList.add(type+"Out");
+			var newimg = document.createElement("img");
+			newimg.classList.add("frame");
+			newimg.src = "der/DER100" + frame + ".jpeg";
+			if (type === "left"){
+				newimg.style.left = "-"+WIDTH+"px";
+			} else if (type === "right") {
+				newimg.style.left = WIDTH+"px";
+			}
+			newimg.classList.add(type+"In");
+			transitions.appendChild(newimg);
+			transitions.appendChild(oldimg);
+			img.style.visibility = "hidden";
+			setTimeout(()=>{
+				img.src = newimg.src
+				img.style.visibility = "visible";
+				transitions.innerHTML = "";
+				clear--;
+			}, 480);
 		}
-		img.classList.add(type+"Out");
-		newimg.classList.add(type+"In");
-		
-		getById("new").appendChild(newimg);
-		setTimeout(function (){
-			img.classList.remove(type+"Out");
-			newimg.classList.remove(type+"In");
-			imgs.removeChild(getById("current"));
-			getById("new").id = "current";
-			getById("current").style.opacity = 1.0;
-			img = newimg;
-			img.id = "img";
-			imgs.style.left = "0px";
-			img.style.left = "0px";
-			var newDiv = document.createElement("div");
-			newDiv.id = "new";
-			imgs.appendChild(newDiv);
-			getById("screen").removeChild(topBox);
-		}, 475);
 	}
 
 
 	function boxClick(action){
-		if (clear) {
-			clear = false;
+		if (clear == 0) {
 			action();
-			clear = true;
 		}
 	}
 
