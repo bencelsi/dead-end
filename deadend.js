@@ -107,9 +107,7 @@
 			action: function(frame){transition(frame, "fade");}
 		}
 	},
-	sounds: {
-		
-	}
+	sounds: {}
 }
 	
 //******************************************
@@ -179,8 +177,7 @@
 
 	//clears and updates the clickable boxes, based on the current frame
 	function updateBoxes(frame) {
-		getById("setBoxes").innerHTML = "";
-		getById("customBoxes").innerHTML = "";
+		getById("boxes").innerHTML = "";
 		var frameData = json.frames[frame];
 		if (frameData.left != null) {
 			makeBox(json.boxes.left, simpleEval(frameData.left));
@@ -237,7 +234,7 @@
 				});
 			};
 				
-		getById("customBoxes").appendChild(box);
+		getById("boxes").appendChild(box);
 	}
 
 
