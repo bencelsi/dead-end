@@ -288,7 +288,7 @@
 	function boxClick(action){
 		if (processes == 0) {
 			processes++;
-			launchFullScreen(getById("window"));
+			//launchFullScreen(getById("window"));
 			action();
 			processes--;
 		}
