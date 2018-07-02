@@ -1,11 +1,12 @@
 
 (function(){
 	"use strict";
-	const HEIGHT = 600;
-	const WIDTH = 600;
+	const HEIGHT = 750;
+	const WIDTH = 750;
+	const TRANSITION_SPEED = 400;
 	var power = false;
-	var clear = 0; //whether not to listen to user input
-
+	var processes = 0; //whether not to listen to user input
+	var frame = 0;
 
 	//frame relation data:	
 	const json = 
@@ -56,14 +57,13 @@
 		},{
 			left: 10, right: 8, back: 11,
 			boxes: [
-				{	if: "!power", 
+				{	condition: ()=>{return(!power);},
 					pos: [.4*WIDTH, .5*HEIGHT, .15*WIDTH, .15*HEIGHT],
 					cursor: "interact",
-					action: ()=>{setVolume("outsiderain", 0, 0);}	
+					action: ()=>{power = true; updateBoxes(frame);}	
 				},
-				{	if: "power",
+				{	condition: ()=>{return(power);},
 					img: "x12",
-
 				}
 			]
 		},{//15
@@ -109,12 +109,11 @@
 	},
 	sounds: {}
 }
-	
+
 //******************************************
 //*****************MODEL********************
 //******************************************
 	
-
 	function initializeSounds(){
 		var rain = playSound("outsiderain", 0, true);
 		//var generator = playSound("reddit", .5, true);
@@ -122,7 +121,7 @@
 		//json.sounds.rain.volume = 0;
 		//rain.volume = 0;
 		for (var i = 0; i < 999; i++) {
-			json.sounds.rain.volume += .001;			
+			json.sounds.rain.volume += .001;
 		}
 	}
 
@@ -131,11 +130,10 @@
 	}
 
 	window.onload = function(){
+		
 		importImages();
 		updateBoxes(0);
-
 		initializeSounds();
-		
 	};
 
 	function importImages(){
@@ -146,23 +144,19 @@
 		}
 	}
 
-
 //******************************************
 //*****************VIEW*********************
 //******************************************
 
-	
-
-
 	function playGif(name, frames, delay){
-		clear++;
+		processes++;
 		var gif = getById("fullGif");
 		gif.src = "movies/" + name + ".gif" + "?a="+Math.random();
 		gif.style.visibility = "visible"
 		getById("movies").appendChild(gif);
 		setTimeout(function(){
 			gif.style.visibility = "hidden";
-			clear--;
+			processes--;
 		}, frames*delay);	
 	}
 
@@ -175,9 +169,12 @@
 	}
 	
 
-	//clears and updates the clickable boxes, based on the current frame
-	function updateBoxes(frame) {
+	//processess and updates the clickable boxes, based on the current frame
+	function updateBoxes(newFrame) {
+		frame = newFrame;
+		console.log(frame);
 		getById("boxes").innerHTML = "";
+		getById("picBoxes").innerHTML = "";
 		var frameData = json.frames[frame];
 		if (frameData.left != null) {
 			makeBox(json.boxes.left, simpleEval(frameData.left));
@@ -193,7 +190,7 @@
 		}
 		if (frameData.boxes != null){			//creates custom boxes
 			for (var i = 0; i < frameData.boxes.length; i++) {
-				if (frameData.boxes[i].if == null || eval(frameData.boxes[i].if)){	//the "if" property is used for conditional boxes
+				if (frameData.boxes[i].condition == null || frameData.boxes[i].condition()){	//the "if" property is used for conditional boxes
 					if (frameData.boxes[i].action != null){
 						makeBox(frameData.boxes[i], frameData.boxes[i].action);
 					} else {
@@ -223,8 +220,8 @@
 		if (info.img != null) {											//pic boxes
 			var pic = document.createElement("img");
 			pic.classList.add("pBox");
-			pic.src = "der/DER100" + info.img + ".jpeg";
-			getById("new").appendChild(pic);
+			pic.src = "der/DER100" + simpleEval(info.img) + ".png";
+			getById("picBoxes").appendChild(pic);
 		}
 
 		box.onclick = 
@@ -244,44 +241,69 @@
 	
 	
 	function transition(frame, type){
-		clear++;
-		updateBoxes(frame);
+		processes++;
 		var img = getById("img");
 		var transitions = getById("transitions");
 		if (type === "none"){
+			updateBoxes(frame);
 			img.src = "der/DER100" + frame + ".jpeg"
 		} else {
-			var oldimg = document.createElement("img");
-			oldimg.classList.add("frame");
-			oldimg.src = img.src;
-			oldimg.classList.add(type+"Out");
-			var newimg = document.createElement("img");
-			newimg.classList.add("frame");
-			newimg.src = "der/DER100" + frame + ".jpeg";
+			createTransition(type+"Out", 0);
+			img.src = "der/DER100" + frame + ".jpeg"
+			updateBoxes(frame);
+			var x = 0;
 			if (type === "left"){
-				newimg.style.left = "-"+WIDTH+"px";
-			} else if (type === "right") {
-				newimg.style.left = WIDTH+"px";
+				x = -WIDTH;
+			} else if (type === "right"){
+				x = WIDTH;
 			}
-			newimg.classList.add(type+"In");
-			transitions.appendChild(newimg);
-			transitions.appendChild(oldimg);
+			createTransition(type+"In", x); 
+
 			img.style.visibility = "hidden";
 			setTimeout(()=>{
-				img.src = newimg.src
 				img.style.visibility = "visible";
+			}, TRANSITION_SPEED/2);
+			setTimeout(()=>{
 				transitions.innerHTML = "";
-				clear--;
-			}, 480);
+				processes--;
+			}, TRANSITION_SPEED-15);
 		}
 	}
 
+	function createTransition(type, x){
+		var transition = document.createElement("div");
+		var img = document.createElement("img");
+		var picBoxes = document.createElement("div");
+		img.src = getById("img").src;
+		img.classList.add("frame");
+		picBoxes.innerHTML = getById("picBoxes").innerHTML;
+		transition.appendChild(img);	
+		transition.appendChild(picBoxes);
+		transition.classList.add("transition");
+		transition.style.left = x+"px";
+		transition.classList.add(type);
+		getById("transitions").appendChild(transition);
+	}
 
 	function boxClick(action){
-		if (clear == 0) {
+		if (processes == 0) {
+			processes++;
+			launchFullScreen(getById("window"));
 			action();
+			processes--;
 		}
 	}
+
+	function launchFullScreen(element) {
+		if(element.requestFullScreen) {
+		   element.requestFullScreen();
+		} else if(element.mozRequestFullScreen) {
+		   element.mozRequestFullScreen();
+		} else if(element.webkitRequestFullScreen) {
+		   element.webkitRequestFullScreen();
+		}
+	}
+
 
 //******************************************
 //*****************OTHER********************

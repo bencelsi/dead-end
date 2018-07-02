@@ -1,96 +1,58 @@
 body {
 	background-color: black;
-	text-align: center;
-	border-color: red;
 	user-drag: none; 
 	user-select: none;
-
-	-webkit-animation-fill-mode: forwards;
+}
+#window{
+	background-color: black;
+	user-drag: none; 
+	user-select: none;
+	
 }
 
-
-@keyframes leftIn{
-   from{
- 		opacity: 1;
- 	   transform: translateX(0);
-   } to {
-   	opacity: 1;
-      transform: translateX(600px)
-   }
+#vinette{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	opacity: .5;
+	z-index: 7;
+	user-drag: none; 
+	user-select: none;
 }
 
-@keyframes leftOut{
-   from{
-   	opacity: 1;
-      transform: translateX(0);
-   } to {
-   	opacity: 1;
-      transform: translateX(600px)
-   }
+#transitions{
+	position: absolute;
+	width: 100%;
+	height: 100%;	z-index: 5;
 }
 
-@keyframes rightIn{
-   from{
- 		opacity: 1;
- 	   transform: translateX(0);
-   } to {
-   	opacity: 1;
-      transform: translateX(-600px)
-   }
-}
-
-@keyframes rightOut{
-   from{
-   	opacity: 1;
-      transform: translateX(0);
-   } to {
-   	opacity: 1;
-      transform: translateX(-600px)
-   }
-}
-
-@keyframes fadeIn{
-   from{opacity: 0;} to {opacity: 1;}
-}
-
-@keyframes fadeOut{
-   from{opacity: 1;} to {opacity: 0;}
-}
-
-.leftIn{
-	animation:leftIn .5s;
-} .leftOut{
-	animation:leftOut .5s;
-} .rightIn{
-	animation:rightIn .5s;
-} .rightOut{
-	animation:rightOut .5s;
-} .fadeIn{
-	animation:fadeIn .5s;
-} .fadeOut{
-	animation:fadeOut .5s;
+.transition{
+	position: absolute;	
+	width: 100%;
+	height: 100%;
 }
 
 #screen{
-	position:relative;
-	width: 600px;
-	height: 600px;
+	position: relative;
+	width: 750px;
+	height: 750px;
 	margin: auto;
-	margin-top: 50px;
+	margin-top: 0px;
+	background-color: black;
 	overflow: hidden;
+
 }
 
-#imgs {
+.frame {
 	display: inline-block;
-	position: relative;
+	position: absolute;
 	top: 0px;
 	left: 0px;
 	width: 100%;
 	height: 100%;
-	/border: solid blue 2px;
 }
 
-#img, .frame{
+#img {
 	display: inline-block;
 	position: absolute;
 	top: 0px;
@@ -104,15 +66,6 @@ body {
 	/border: solid blue 2px;
 }
 
-#newimg {
-	z-index: -2;
-	/border: solid green 2px;
-}
-
-#current .pBox {
-	z-index: 1;
-}
-
 #new .pBox {
 	z-index: -1;
 }
@@ -124,32 +77,21 @@ body {
 	height: 100%;
 	top:0;
 	left: 0;
-	/border:solid green 2px;
-}
-
-#topBox {
-	position:absolute;
-	z-index: 10;
-	cursor: none;
-	width:600px;
-	height:600px;
-	top: 0px;
-	float: left;
 }
 
 .box{
-	z-index: 1;
+	z-index: 10;
 	position:absolute;
 	//border: solid red 2px;
 }
 
 .gif{
 	position:absolute;
-	z-index: 200;
+	z-index: 6;
 	top:0px;
 	left:0px;
-	width:600px;
-	height:600px;
+	width:750px;
+	height:750px;
 	visibility: hidden;
 }
 
@@ -158,41 +100,73 @@ body {
 	width: 0;
 	z-index: -20;
 	display: none;
-}
+} 
 
-.leftCursor {
-	cursor: url(extra/left.png), auto;
-}
 
-.rightCursor {
-	cursor: url(extra/right.png), auto;
-}
-
-.forwardCursor {
-	cursor: url(extra/forward.png), auto;
-}
-
-.backCursor {
-	cursor: url(extra/back.png), auto;
-}
-
-.zoomCursor {
-	cursor: cell;
-}
-
-.interactCursor {
-	cursor: pointer;
-}
-
-.defaultCursor {
-	cursor: default;
-}
-
-#preloads img{
+#preloads {
 	position:absolute;
 	left:0px;
 	top:0px;
 	width:1px;
 	height:1px;
-	opacity:1;
+	opacity:0;
+}
+
+.leftCursor {
+	cursor: url(extra/left.png), auto;
+} .rightCursor {
+	cursor: url(extra/right.png), auto;
+} .forwardCursor {
+	cursor: url(extra/forward.png), auto;
+} .backCursor {
+	cursor: url(extra/back.png), auto;
+} .zoomCursor {
+	cursor: cell;
+} .interactCursor {
+	cursor: pointer;
+} .defaultCursor {
+	cursor: default;
+}
+
+
+@keyframes leftIn{
+   from{transform: translateX(0);
+   } to {transform: translateX(750px)}
+}
+@keyframes leftOut{
+   from{transform: translateX(0);
+   } to {transform: translateX(750px)}
+}
+@keyframes rightIn{
+   from{transform: translateX(0);
+   } to {transform: translateX(-750px)}
+}
+@keyframes rightOut{
+   from{transform: translateX(0);
+   } to {transform: translateX(-750px)}
+}
+@keyframes fadeIn{
+   from{opacity: 0;} to {opacity: 1;}
+}
+@keyframes fadeOut{
+   from{opacity: 1;} to {opacity: 0;}
+}
+
+.leftIn{
+	animation:leftIn .4s;
+} .leftOut{
+	animation:leftOut .4s;
+} .rightIn{
+	animation:rightIn .4s;
+} .rightOut{
+	animation:rightOut .4s;
+} .fadeIn{
+	animation:fadeIn .4s;
+} .fadeOut{
+	animation:fadeOut .4s;
+}
+
+#myvideo:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
 }
