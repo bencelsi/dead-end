@@ -217,7 +217,7 @@ const boxes = {
 	//processess and updates boxes, based on the given frame
 	function updateBoxes(newFrame) {
 		console.log(newFrame);
-		clearBoxes();
+		clearCustomBoxes();
 		frame = newFrame;
 		var frameData = json.frames[frame];
 		if (frameData.boxes != null) {			//creates custom boxes
@@ -228,9 +228,6 @@ const boxes = {
 		updateStandardBoxes(newFrame);
 	}
 
-	function updateBox(boxData) {
-		clearBox(boxData.box)
-	}
 
 
 //******************************************
@@ -295,13 +292,12 @@ const boxes = {
 		if (frameData.boxes != null) {
 			for (var i = 0; i < frameData.boxes.length; i++) {
 				if (frameData.boxes[i].element != null) {
-					clearBox(frameData.boxes[i].element);
+					frameData.boxes[i].element.remove();
 				}
 			}
 		}
 	}
 
-	
 //GENERIC BOXES
 	function makeBox(boxData) {
 		var box = document.createElement("div");
@@ -325,9 +321,6 @@ const boxes = {
 		if (boxData.cursor != null) {
 			element.classList.add(boxData.cursor + "Cursor");
 		}
-	}
-	function clearBox(box) {
-		box.remove();
 	}
 	
 //TRANSITIONS
