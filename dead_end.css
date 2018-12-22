@@ -73,7 +73,8 @@ body {
 #transitions{
 	position: absolute;
 	width: 100%;
-	height: 100%;	z-index: 5;
+	height: 100%;	
+	z-index: 5;
 	top: 0;
 }
 
@@ -97,9 +98,11 @@ body {
 
 .picBox {
 	position:absolute;
-	
 	width: 100%;
 	height: 100%;
+	left: 0px;
+	top: 0px;
+	z-index: 4;
 }
 
 .box{

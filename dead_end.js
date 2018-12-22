@@ -9,7 +9,7 @@
 	const HEIGHT = 750;
 	const WIDTH = 750;
 	const SIDE_SPEED = 400;
-	const FADE_SPEED = 300;
+	const FADE_SPEED = 400;
 
 	let power = true;
 	let processes = 0; //whether not to listen to user input
@@ -89,8 +89,13 @@ const frames = {
 	}
 }
 
-const inventory = 
-[]
+let inventoryMap = {
+	0: {
+		name: "key",
+		state: 0,
+		img: "burger"
+	}
+}
 
 
 //CONTROL DATA
@@ -135,15 +140,14 @@ const boxes = {
 				}	
 			}],
 		12:[{ 
-			pos: [.46, .53, .11, .2],
+			pos: [.32, .53, .35, .08],
 			condition: ()=>{return(inventoryMap[0].state == 0);},
 			cursor: "open",
-			img: "x12",
 			addListeners: function(box) {
 				box.onclick = ()=>{
-					inventoryMap[0].state == 1;
-					inventory.push(0);
-					updateBoxes(frame);
+					inventoryMap[0].state = 1;
+					updateCustomBoxes(frame);
+					updatePics(frame);
 					updateInventory(frame);
 				}
 			}
@@ -177,6 +181,12 @@ const boxes = {
 					}
 				}
 			}]
+	},
+	pics: {
+		12: [{
+			condition: ()=>{return(inventoryMap[0].state == 0);},
+			img: "x12",
+		}]
 	}
 }
 
@@ -203,13 +213,6 @@ const boxes = {
 	}
 
 
-	let inventoryMap = {
-		0: {
-			name: "key",
-			state: 0,
-			img: "burger"
-		}
-	}
 
 //******************************************
 //*****************CONTROLLER***************
@@ -221,26 +224,7 @@ const boxes = {
 		updateInventory();
 	}
 
-	//processess and updates boxes, based on the given frame
-	function updateBoxes(newFrame) {
-		console.log(newFrame);
-		clearCustomBoxes();
-		frame = newFrame;
-
-		updateStandardBoxes(newFrame);
-		let boxesData = boxes.custom[frame];
-		if (boxesData != null) {			//creates custom boxes
-			for (let i = 0; i < boxesData.length; i++) {
-				makeCustomBox(boxesData[i]);
-			}
-		}
-	}
-
-	function updateInventory(){
-		for (let i = 0; i < inventory.length; i++){
-			makeInventoryBox(inventory[i]);
-		}
-	}
+	
 
 	//makes inventory boxes draggable
 	function makeDraggable(box, release) {
@@ -271,7 +255,6 @@ const boxes = {
 					box.style.left = boxX;
 					box.style.top = boxY;
 					//setBoxPos(box, [0,0,0,0]);
-					console.log(box.style.top);
 					document.onmousemove = null;
 					setBoxCursor(box, "open");
 				}
@@ -292,18 +275,17 @@ const boxes = {
 		//window.onclick = ()=>launchFullScreen(getById("window"));
 	}
 
-//STANDARD BOXES
-	function makeStandardBoxes() {
-		makeStandardBox(boxes.standard.left);
-		makeStandardBox(boxes.standard.right);
-		makeStandardBox(boxes.standard.forward);
-		makeStandardBox(boxes.standard.back);
-	} 
-
-	function makeStandardBox(boxData) {
-		let box = makeBox(boxData);
-		getById("standardBoxes").appendChild(box);
+	//processess and updates boxes, based on the given frame
+	function updateBoxes(newFrame) {
+		frame = newFrame;
+		updatePics(newFrame);
+		updateStandardBoxes(newFrame);
+		updateCustomBoxes(newFrame);
+		
 	}
+
+
+//STANDARD BOXES
 
 	function updateStandardBoxes(frame) {
 		updateStandardBox(boxes.standard.left, frames[frame].left);
@@ -322,17 +304,35 @@ const boxes = {
 		}
 	}
 
+	//only called at init! TODO: replace with 
+	function makeStandardBoxes() {
+		makeStandardBox(boxes.standard.left);
+		makeStandardBox(boxes.standard.right);
+		makeStandardBox(boxes.standard.forward);
+		makeStandardBox(boxes.standard.back);
+	} 
+	function makeStandardBox(boxData) {
+		let box = makeBox(boxData);
+		getById("standardBoxes").appendChild(box);
+	}
+
+
 //CUSTOM BOXES
+	function updateCustomBoxes(frame){
+		getById("customBoxes").innerHTML = "";
+		let boxesData = boxes.custom[frame];
+		if (boxesData != null) {			//creates custom boxes
+			for (let i = 0; i < boxesData.length; i++) {
+				makeCustomBox(boxesData[i]);
+			}
+		}
+	}
+
 	//returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 	function makeCustomBox(boxData) {
 		if (boxData.condition == null || boxData.condition()) {
 			let box = makeBox(boxData);
-			if (boxData.img != null) {											//pic boxes
-				let pic = document.createElement("img");
-				pic.classList.add("picBox");
-				pic.src = BOX_PATH + simpleEval(boxData.img) + ".png";
-				box.appendChild(pic);
-			}
+			
 			if(boxData.addListeners != null) {
 				boxData.addListeners(box);
 			}
@@ -340,25 +340,39 @@ const boxes = {
 		}
 	}
 
-	function clearCustomBoxes() {
-		getById("customBoxes").innerHTML = "";
-		/*
-		let boxesData = boxes.custom[frame];
-		if (boxesData != null) {
-			for (let i = 0; i < boxesData.length; i++) {
-				if (boxesData[i].element != null) {
-					boxesData[i].element.remove();
+
+
+
+//PIC BOXES
+	function updatePics(frame){
+		getById("pics").innerHTML = "";
+		let pics = boxes.pics[frame];
+		if (pics != null){
+			for (let i = 0; i < pics.length; i++) {
+				if (pics[i].condition == null || pics[i].condition()){
+					let pic = document.createElement("img");
+					pic.classList.add("picBox");
+					pic.src = BOX_PATH + simpleEval(pics[i].img) + ".png";
+					getById("pics").appendChild(pic);
 				}
 			}
-		}*/
+		}
 	}
 
+
 //INVENTORY BOXES
+	function updateInventory(){
+		for (let i = 0; i < 1; i++){
+			if (inventoryMap[i].state == 1){
+				makeInventoryBox(i);
+			}
+		}
+	}
+
 	function makeInventoryBox(id){
 		let box = document.createElement("div");
 		box.classList.add("inventory");
 		box.classList.add("box");
-		box.id = inventoryMap[id].name;
 		box.style.left = "0px";
 		box.style.top = "0px";
 		let img = document.createElement("img");
@@ -368,7 +382,6 @@ const boxes = {
 		makeDraggable(box);
 		getById("inventory").appendChild(box);
 	}
-
 //GENERIC BOXES
 	function makeBox(boxData) {
 		let box = document.createElement("div");
@@ -416,7 +429,6 @@ const boxes = {
 		getById("img").src = FRAME_PATH + newFrame + ".png"
 		updateBoxes(newFrame);
 		createTransition("leftIn", -WIDTH);
-		
 	}
 
 	function rightTransition(newFrame) {
@@ -428,6 +440,7 @@ const boxes = {
 
 	function fadeTransition(newFrame) {
 		createTransition("fadeOut", 0);
+
 		getById("img").src = FRAME_PATH + newFrame + ".png"
 		updateBoxes(newFrame);
 		createTransition("fadeIn", 0);
@@ -437,22 +450,19 @@ const boxes = {
 	function createTransition(type, x) {
 		let transition = document.createElement("div");
 		let img = document.createElement("img");
-		let picBoxes = document.createElement("div");
 		img.src = getById("img").src;
 		img.classList.add("frame");
-		let children = getById("customBoxes").children;
-		for (let i = 0; i < children.length; i++) {
-			if (children[i].src != undefined){
-				let clone = children[i].cloneNode();
-				picBoxes.appendChild(clone);
-			}
-		}
-		//picBoxes.innerHTML = getById("picBoxes").innerHTML;
+		
+		let picBoxes = document.createElement("div");
+		picBoxes.innerHTML = getById("pics").innerHTML;
+		console.log(type + ": " + getById("pics").innerHTML);
 		transition.appendChild(img);
 		transition.appendChild(picBoxes);
 		transition.classList.add("transition");
 		transition.style.left = x+"px";
 		transition.classList.add(type);
+		
+		
 		getById("transitions").appendChild(transition);
 	}
 
