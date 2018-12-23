@@ -13,7 +13,7 @@
 
 	let power = true;
 	let processes = 0; //whether not to listen to user input
-	let frame = 16;
+	let frame = 8;
 	let key = 0;
 	let lever = 0;
 
@@ -53,7 +53,7 @@ const frames = {
 		back: 24
 	},13:{//13
 	},14:{
-		left: 10, right: 8, back: 24
+		left: 10, right: 8, back: 11
 	},15:{//15
 		left: 23, right: 20
 	},16:{//16
@@ -85,7 +85,6 @@ const frames = {
 	},104:{
 		forward:105
 	},105:{
-		forward:0
 	}
 }
 
@@ -102,22 +101,22 @@ let inventoryMap = {
 const boxes = {
 	standard: {
 		left: {
-			pos: [0, .2, .2, .6],
+			pos: [0, .2, .2, .8],
 			transition: "left",
 			cursor: "left"
 		},
 		right: {
-			pos: [.8, .2, .2, .6],
+			pos: [.8, 1, .2, .8],
 			transition: "right",
 			cursor: "right"
 		},
 		forward: {
-			pos: [.25, .25, .5, .5],
+			pos: [.25, .75, .25, .75],
 			transition: "fade",
 			cursor: "forward"
 		},
 		back: {
-			pos: [0, .8, 1, .2],
+			pos: [0, 1, 0, .2],
 			transition: "fade",
 			cursor: "back"
 		}
@@ -133,11 +132,11 @@ const boxes = {
 					};
 				}
 			}],
-		11:[{	pos: [.04, .5, .25, .75],
+		11:[{	pos: [.05, .2, .25, .75],
 				cursor: "zoom",
 				addListeners: function(box) {
 					box.onclick = ()=>transition(14, "fade");
-				}	
+				}
 			}],
 		12:[{ 
 			pos: [.32, .53, .35, .08],
@@ -153,21 +152,12 @@ const boxes = {
 			}
 		}],
 		14:[{
-				pos: [.46, .53, .11, .2],
+				pos: [.45, .57, .4, .47],
 				cursor: "open",
 				addListeners: function(box) {
-					makeDraggable(box,
-						function(event) {
-							console.log(event.clientY);
-							if (event.clientY > 300){
-								//power = true;
-								updateBoxes(frame);
-								//box.src = BOX_PATH + "x14.2.3" + ".png";
-							} else {
-								box.src = BOX_PATH + "x14.2.2" + ".png";
-							}
-						}
-					);
+					
+					//box.src = BOX_PATH + "x14.2.2" + ".png";
+					
 				}
 			},{condition: ()=>{return(power);},
 				img: "x12",
@@ -249,7 +239,7 @@ const boxes = {
 
 			document.onmouseup = function(event) {
 				event.preventDefault();
-				if (release != undefined) {
+				if (release != null) {
 					release();
 				} else {
 					box.style.left = boxX;
@@ -395,9 +385,9 @@ const boxes = {
 	function setBoxPos(box, pos) {
 		if (pos != null) {
 			box.style.left = pos[0] * WIDTH + "px";
-			box.style.top = pos[1] * HEIGHT + "px";
-			box.style.width = pos[2] * WIDTH + "px";
-			box.style.height = pos[3] * HEIGHT + "px";
+			box.style.width = (pos[1] - pos[0]) * WIDTH + "px";
+			box.style.bottom = pos[2] * HEIGHT + "px";
+			box.style.height = (pos[3] - pos[2]) * HEIGHT + "px";	
 		}
 	}
 
