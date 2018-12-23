@@ -71,6 +71,7 @@ body {
 }
 
 #transitions{
+	cursor:  url(assets/other/closed.png), auto;
 	position: absolute;
 	width: 100%;
 	height: 100%;	
@@ -79,6 +80,7 @@ body {
 }
 
 .transition{
+	cursor:  url(assets/other/closed.png), auto;
 	position: absolute;	
 	width: 100%;
 	height: 100%;

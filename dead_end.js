@@ -11,9 +11,9 @@
 	const SIDE_SPEED = 400;
 	const FADE_SPEED = 400;
 
-	let power = true;
+	let power = false;
 	let processes = 0; //whether not to listen to user input
-	let frame = 8;
+	let frame = 100;
 	let key = 0;
 	let lever = 0;
 
@@ -85,14 +85,21 @@ const frames = {
 	},104:{
 		forward:105
 	},105:{
+		forward:0
 	}
 }
 
-let inventoryMap = {
+let inventory = {
 	0: {
 		name: "key",
 		state: 0,
-		img: "burger"
+		img: "burger",
+		targetId: "frontDoor",
+		action: ()=>{
+			inventory[0].state = 2;
+			updatePics(frame);
+			updateInventory();
+		}
 	}
 }
 
@@ -138,32 +145,46 @@ const boxes = {
 					box.onclick = ()=>transition(14, "fade");
 				}
 			}],
-		12:[{ 
-			pos: [.32, .53, .35, .08],
-			condition: ()=>{return(inventoryMap[0].state == 0);},
-			cursor: "open",
-			addListeners: function(box) {
-				box.onclick = ()=>{
-					inventoryMap[0].state = 1;
-					updateCustomBoxes(frame);
-					updatePics(frame);
-					updateInventory(frame);
-				}
-			}
-		}],
-		14:[{
-				pos: [.45, .57, .4, .47],
+		12:[{ pos: [.32, .65, .4, .48],
+				condition: ()=>{return(inventory[0].state == 0);},
 				cursor: "open",
 				addListeners: function(box) {
-					
-					//box.src = BOX_PATH + "x14.2.2" + ".png";
-					
+				box.onclick = ()=>{
+						inventory[0].state = 1;
+						updateCustomBoxes(frame);
+						updatePics(frame);
+						updateInventory(frame);
+					}
+				}
+			}],
+		14:[{	pos: [.45, .57, .4, .47],
+				cursor: "open",
+				addListeners: function(box) {
+					power = true;
+					updatePics(frame);
+					//box.src = BOX_PATH + "x14.2.2" + ".png";	
 				}
 			},{condition: ()=>{return(power);},
 				img: "x12",
 				cursor: "open",
 			}],
-		24:[{	pos: [.4, .6, .05, .1],
+		16:[{ condition: ()=>{return(inventory[0].state != 3);},
+				pos: [.45, .5, .33, .42],
+				cursor: "open",
+				id: "frontDoor",
+				addListeners: function(box) {
+					box.onclick = ()=>{
+						if (inventory[0].state <= 1){
+							playSound("momoko", 1, true);
+						} else if (inventory[0].state == 2){
+							inventory[0].state = 3;
+							updatePics(frame);
+							updateCustomBoxes(frame);
+						}
+					}
+				}
+			}],
+		24:[{	pos: [.48, .57, .87, .93],
 				cursor: "zoom",
 				addListeners: function(box) {
 					box.onclick = ()=>{
@@ -173,10 +194,15 @@ const boxes = {
 			}]
 	},
 	pics: {
-		12: [{
-			condition: ()=>{return(inventoryMap[0].state == 0);},
-			img: "x12",
-		}]
+		12:[{ condition: ()=>{return(inventory[0].state == 0);},
+				img: "x12",
+			}],
+		16:[{	condition: ()=>{return(inventory[0].state == 2);},
+				img: "x16.1",
+			},{
+				condition: ()=>{return(inventory[0].state == 3);},
+				img: "x16.2",
+			}]
 	}
 }
 
@@ -217,14 +243,11 @@ const boxes = {
 	
 
 	//makes inventory boxes draggable
-	function makeDraggable(box, release) {
+	function makeDraggable(box, targetId, action) {
 		setBoxCursor(box, "open");
 		box.onmousedown = function(event) {
-			//mouseDown();
-
 			event.preventDefault();
-			setBoxCursor(box, "closed");
-			
+			setBoxCursor(box, "closed");	
 			let boxX = parseInt(box.style.left)
 			let boxY = parseInt(box.style.top)
 			let mouseX = event.clientX
@@ -239,8 +262,9 @@ const boxes = {
 
 			document.onmouseup = function(event) {
 				event.preventDefault();
-				if (release != null) {
-					release();
+				let target = getById(targetId);
+				if (target != null && isCollide(box, target)){
+					action();
 				} else {
 					box.style.left = boxX;
 					box.style.top = boxY;
@@ -268,6 +292,7 @@ const boxes = {
 	//processess and updates boxes, based on the given frame
 	function updateBoxes(newFrame) {
 		frame = newFrame;
+		console.log(newFrame);
 		updatePics(newFrame);
 		updateStandardBoxes(newFrame);
 		updateCustomBoxes(newFrame);
@@ -352,8 +377,9 @@ const boxes = {
 
 //INVENTORY BOXES
 	function updateInventory(){
+		getById("inventory").innerHTML = "";
 		for (let i = 0; i < 1; i++){
-			if (inventoryMap[i].state == 1){
+			if (inventory[i].state == 1){
 				makeInventoryBox(i);
 			}
 		}
@@ -366,12 +392,12 @@ const boxes = {
 		box.style.left = "0px";
 		box.style.top = "0px";
 		let img = document.createElement("img");
-		console.log(inventoryMap.id);
-		img.src = INVENTORY_PATH + inventoryMap[id].img + ".png";
+		img.src = INVENTORY_PATH + inventory[id].img + ".png";
 		box.appendChild(img);
-		makeDraggable(box);
+		makeDraggable(box, inventory[id].targetId, inventory[id].action);
 		getById("inventory").appendChild(box);
 	}
+
 //GENERIC BOXES
 	function makeBox(boxData) {
 		let box = document.createElement("div");
@@ -379,6 +405,7 @@ const boxes = {
 		boxData.element = box;
 		setBoxPos(box, boxData.pos);
 		setBoxCursor(box, boxData.cursor);
+		setBoxId(box, boxData.id);
 		return box;
 	}
 
@@ -395,6 +422,11 @@ const boxes = {
 		box.style.cursor = "url(" + OTHER_PATH + cursor + ".png), auto";
 	}
 	
+	function setBoxId(box, id){
+		if (id != null){
+			box.id = id;
+		}
+	}
 //TRANSITIONS
 	//make a controller function for this?
 	function transition(newFrame, type) {
@@ -430,7 +462,6 @@ const boxes = {
 
 	function fadeTransition(newFrame) {
 		createTransition("fadeOut", 0);
-
 		getById("img").src = FRAME_PATH + newFrame + ".png"
 		updateBoxes(newFrame);
 		createTransition("fadeIn", 0);
@@ -442,24 +473,20 @@ const boxes = {
 		let img = document.createElement("img");
 		img.src = getById("img").src;
 		img.classList.add("frame");
-		
 		let picBoxes = document.createElement("div");
 		picBoxes.innerHTML = getById("pics").innerHTML;
-		console.log(type + ": " + getById("pics").innerHTML);
 		transition.appendChild(img);
 		transition.appendChild(picBoxes);
 		transition.classList.add("transition");
 		transition.style.left = x+"px";
 		transition.classList.add(type);
-		
-		
 		getById("transitions").appendChild(transition);
 	}
 
 //OTHER
 	//Plays the gif of the given name.  Takes the number of frames and the delay to calculate the time... (maybe make this automatic somehow?)
 	function playGif(name, frames, delay) {
-		processes++;	
+		processes++;
 		let gif = getById("fullGif");
 		gif.src = GIF_PATH + name + ".gif" + "?a="+Math.random();
 		gif.style.visibility = "visible"
@@ -472,7 +499,7 @@ const boxes = {
 
 	function playSound(name, volume, loop) {
 		let sound = new Audio(AUDIO_PATH + name + ".mp3");	
-		sound.volume = 0;
+		sound.volume = volume;
 		sound.play();
 		return sound;
 	}
