@@ -13,8 +13,7 @@
 
 	let power = false;
 	let processes = 0; //whether not to listen to user input
-	let frame = 100;
-	let key = 0;
+	let frame = 8;
 	let lever = 0;
 
 	window.onload = function() {
@@ -160,9 +159,11 @@ const boxes = {
 		14:[{	pos: [.45, .57, .4, .47],
 				cursor: "open",
 				addListeners: function(box) {
-					power = true;
-					updatePics(frame);
-					//box.src = BOX_PATH + "x14.2.2" + ".png";	
+					box.onclick = ()=>{
+						power = true;
+						updatePics(frame);
+					}
+					
 				}
 			},{condition: ()=>{return(power);},
 				img: "x12",
@@ -197,6 +198,9 @@ const boxes = {
 		12:[{ condition: ()=>{return(inventory[0].state == 0);},
 				img: "x12",
 			}],
+		14: [{ condition: ()=>{console.log(power); return(power == true);},
+				img: "x14.1",
+		}],
 		16:[{	condition: ()=>{return(inventory[0].state == 2);},
 				img: "x16.1",
 			},{
@@ -205,6 +209,16 @@ const boxes = {
 			}]
 	}
 }
+
+
+
+
+
+
+
+
+
+
 
 //******************************************
 //*****************MODEL********************
@@ -230,17 +244,19 @@ const boxes = {
 
 
 
+
+
+
+
+
+
+
 //******************************************
 //*****************CONTROLLER***************
 //******************************************
-
-
-
 	function initController() {
 		updateInventory();
 	}
-
-	
 
 	//makes inventory boxes draggable
 	function makeDraggable(box, targetId, action) {
@@ -276,7 +292,14 @@ const boxes = {
 		};
 	}
 
-	
+
+
+
+
+
+
+
+
 
 
 //******************************************
@@ -286,7 +309,7 @@ const boxes = {
 		importImages();
 		makeStandardBoxes();
 		updateBoxes(frame);	
-		//window.onclick = ()=>launchFullScreen(getById("window"));
+		window.onclick = ()=>launchFullScreen(getById("window"));
 	}
 
 	//processess and updates boxes, based on the given frame
@@ -296,7 +319,6 @@ const boxes = {
 		updatePics(newFrame);
 		updateStandardBoxes(newFrame);
 		updateCustomBoxes(newFrame);
-		
 	}
 
 
@@ -521,7 +543,19 @@ const boxes = {
 			preload.src = FRAME_PATH + i + ".png";
 			getById("preloads").appendChild(preload);
 		}
+		for (let i = 100; i < 107; i++) {
+			let preload = new Image();
+			preload.src = FRAME_PATH + i + ".png";
+			getById("preloads").appendChild(preload);
+		}
 	}
+
+
+
+
+
+
+
 
 
 
@@ -535,7 +569,7 @@ const boxes = {
 		return document.getElementById(id);
 	}
 
-	//If x is a function, returns result of evaluating it, otherwise returns x
+	//If x is a function, returns the result of evaluating x, otherwise returns x
 	function simpleEval(x) {
 		if (x instanceof Function) {
 			return (x)();
@@ -544,6 +578,7 @@ const boxes = {
 		}
 	}
 
+	//returns true if a and b are overlapping
 	function isCollide(a, b) {
     	return !(
      		((a.y + a.height) < (b.y)) ||
@@ -551,6 +586,5 @@ const boxes = {
       	((a.x + a.width) < b.x) ||
       	(a.x > (b.x + b.width))
     	);
-}
-
+	}
 })();
