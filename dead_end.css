@@ -4,7 +4,7 @@ body {
 	user-select: none;
 }
 
-#window{
+#window {
 	height: 100%;
 	width: 100%;
 }
@@ -20,10 +20,10 @@ body {
 	margin-left: -475px;
 	height: 750px;
 	width: 950px;
-	/border: 1px blue solid;
+	/*border: 1px blue solid;*/
 }
 
-#cursor{
+#cursor {
 	width: 100%;
 	height: 100%;
 	position: absolute;
@@ -32,7 +32,7 @@ body {
 }
 
 
-#screen{
+#screen {
 	margin:0;
 	position: relative;
 	width: 750px;
@@ -40,27 +40,27 @@ body {
 	top:0;
 	background-color: black;
 	overflow: hidden;
-	/border: 1px green solid;
+	/*border: 1px green solid;*/
 }
 
-#menu{
+#menu {
 	margin:0;
 	left:0px;
 	position: relative;
 	width: 100px;
 	height: 750px;
-	/border: 1px yellow solid;
+	/*border: 1px yellow solid;*/
 }
 
-#inventory{
+#inventory {
 	margin:0;
 	position: relative;
 	width: 100px;
 	height: 750px;
-	/border: 1px orange solid;
+	/*border: 1px orange solid;*/
 }
 
-#vinette{
+#vinette {
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -70,7 +70,7 @@ body {
 	user-select: none;
 }
 
-#transitions{
+#transitions {
 	cursor:  url(assets/other/closed.png), auto;
 	position: absolute;
 	width: 100%;
@@ -79,14 +79,14 @@ body {
 	top: 0;
 }
 
-.transition{
+.transition {
 	cursor:  url(assets/other/closed.png), auto;
 	position: absolute;	
 	width: 100%;
 	height: 100%;
 }
 
-.frame {
+#frame {
 	width: 100%;
 	height: 100%;
 }
@@ -107,13 +107,13 @@ body {
 	z-index: 4;
 }
 
-.box{
+.box {
 	z-index: 10;
 	position:absolute;
 	/border: 1px blue solid;
 }
 
-.gif{
+.gif {
 	position:absolute;
 	z-index: 6;
 	width:100%;
@@ -143,64 +143,28 @@ body {
 	opacity:0;
 }
 
-.leftCursor {
-	cursor: url(assets/other/left.png), auto;
-} .rightCursor {
-	cursor: url(assets/other/right.png), auto;
-} .forwardCursor {
-	cursor: url(assets/other/forward.png), auto;
-} .backCursor {
-	cursor: url(assets/other/back.png), auto;
-} .zoomCursor {
-	cursor: cell;
-} .interactCursor {
-	cursor: pointer;
-} .closedCursor {
-	cursor:  url(assets/other/closed.png), auto;
-} .openCursor {
-	cursor:  url(assets/other/open.png), auto;
-} .defaultCursor {
-	cursor: default;
-}
+.leftCursor { cursor: url(assets/other/left.png), auto; } 
+.rightCursor { cursor: url(assets/other/right.png), auto; } 
+.forwardCursor { cursor: url(assets/other/forward.png), auto; } 
+.backCursor { cursor: url(assets/other/back.png), auto; } 
+.zoomCursor { cursor: cell; } 
+.interactCursor { cursor: pointer; } 
+.closedCursor { cursor:  url(assets/other/closed.png), auto; } 
+.openCursor { cursor:  url(assets/other/open.png), auto; } 
+.defaultCursor { cursor: default; }
 
-@keyframes leftIn{
-   from{transform: translateX(0);
-   } to {transform: translateX(750px)}
-}
-@keyframes leftOut{
-   from{transform: translateX(0);
-   } to {transform: translateX(750px)}
-}
-@keyframes rightIn{
-   from{transform: translateX(0);
-   } to {transform: translateX(-750px)}
-}
-@keyframes rightOut{
-   from{transform: translateX(0);
-   } to {transform: translateX(-750px)}
-}
-@keyframes fadeIn{
-   from{opacity: 0;} to {opacity: 1;}
-}
-@keyframes fadeOut{
-   from{opacity: 1;} to {opacity: 0;}
-}
+@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(750px) }}
+@keyframes leftOut { from { transform: translateX(0) }}
+@keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-750px) }}
+@keyframes rightOut {  from { transform: translateX(0) }}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
+@keyframes fadeOut { from { opacity: 1 }}
 
-.leftIn{
-	animation:leftIn .4s;
-} .leftOut{
-	animation:leftOut .4s;
-} .rightIn{
-	animation:rightIn .4s;
-} .rightOut{
-	animation:rightOut .4s;
-} .fadeIn{
-	animation:fadeIn 1s;
-} .fadeOut{
-	animation:fadeOut 1s;
-}
+.leftIn { animation:leftIn .4s }
+.leftOut { animation:leftOut .4s; transform: translateX(750px) }
+.rightIn { animation:rightIn .4s} 
+.rightOut { animation:rightOut .4s; transform: translateX(-750px) } 
+.fadeIn { animation:fadeIn 1s; } 
+.fadeOut { animation:fadeOut 1s; opacity: 0 }
 
-#myvideo:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
-}
+#myvideo:-webkit-full-screen { width: 100%; height: 100%; }
