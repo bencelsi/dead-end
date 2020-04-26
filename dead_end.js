@@ -22,7 +22,7 @@
 		initController();
 	};
 
-//MODEL DATA
+//MODEL
 const frames = { 
 	0: {//0
 		forward: 1	
@@ -461,7 +461,7 @@ function transition(newFrame, type) {
 		setTimeout(()=>{
 			getById("transitions").innerHTML = "";
 			processes--;
-		}, SIDE_SPEED);
+		}, SIDE_SPEED + 400);
 	}
 }
 
@@ -474,7 +474,7 @@ function createTransition(type) {
 	picBoxes.id = null;
 	transition.appendChild(picBoxes);
 	transition.classList.add("transition");
-	
+		
 	transition.classList.add(type);
 	if (type == "leftIn"){
 		transition.style.left = -WIDTH + "px";
