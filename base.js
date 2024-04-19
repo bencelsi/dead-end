@@ -259,7 +259,6 @@ function makeDraggable(item, targetId, targetAction) {
 				document.onmousemove = null
 				setCursor(item, 'open')
 			}
-
 		}
 	}
 }
